@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="item-container">
+    <!-- Titre -->
+    <h2 class="item-title">{{ instance.title }}</h2>
+
+    <!-- Contenu principal (Image + Infos) -->
+    <div class="item-content">
+      <!-- Image à gauche -->
+      {% if instance.image %}
+        <div class="item-image">
+          <img src="{{ instance.image.url }}" alt="{{ instance.title }}">
+        </div>
+      {% endif %}
+
+      <!-- Informations à droite -->
+      <div class="item-details">
+        <!-- Champs principaux -->
+        <div class="details-section">
+          {% for field in form.visible_fields %}
+            {% if field.name not in 'raw_genres finished_year finished_month finished_day image' %}
+              <div class="detail-row">
+                <span class="detail-label">{{ field.label }} :</span>
+                <span class="detail-value">{{ field.value|default:"–" }}</span>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Date de fin -->
+        {% if instance.finished_year %}
+          <div class="detail-row">
+            <span class="detail-label">Date de fin :</span>
+            <span class="detail-value">
+              {{ instance.finished_day|default:"--" }}/{{ instance.finished_month|default:"--" }}/{{ instance.finished_year }}
+            </span>
+          </div>
+        {% endif %}
+
+        <!-- Genres -->
+        {% if instance.genres.all %}
+          <div class="detail-row">
+            <span class="detail-label">Genres :</span>
+            <span class="detail-value">
+              {% for genre in instance.genres.all %}
+                <span class="genre-tag">{{ genre.name }}</span>{% if not forloop.last %} {% endif %}
+              {% endfor %}
+            </span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="item-actions">
+      <a href="{% url 'edit_item' model_name=model_name item_id=instance.id %}" class="button edit-btn">✏️ Modifier</a>
+      <button id="deleteBtn" class="button delete-btn">🗑️ Supprimer</button>
+    </div>
+
+    <!-- Formulaire de suppression caché -->
+    <form id="deleteForm" action="{% url 'delete_item' model_name=model_name item_id=instance.id %}" method="post" style="display:none;">
+      {% csrf_token %}
+    </form>
+
+    <!-- Pop-up de confirmation -->
+    <div id="popup" class="confirmation-popup">
+      <div class="popup-content">
+        <p>Êtes-vous sûr de vouloir supprimer cet élément ?</p>
+        <div class="popup-buttons">
+          <button id="confirmDelete" class="popup-confirm">Oui</button>
+          <button id="cancelDelete" class="popup-cancel">Non</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Conteneur principal */
+    .item-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Titre */
+    .item-title {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2em;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    /* Contenu (image + détails) */
+    .item-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    /* Image */
+    .item-image {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .item-image img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Détails */
+    .item-details {
+      flex: 2;
+      min-width: 300px;
+    }
+
+    .details-section {
+      margin-bottom: 20px;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .detail-label {
+      font-weight: bold;
+      min-width: 150px;
+      color: #555;
+    }
+
+    .detail-value {
+      flex: 1;
+      color: #333;
+    }
+
+    /* Tags de genres */
+    .genre-tag {
+      display: inline-block;
+      background: #e0e0e0;
+      padding: 3px 8px;
+      border-radius: 15px;
+      font-size: 0.9em;
+      margin-right: 5px;
+    }
+
+    /* Boutons d'action */
+    .item-actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .edit-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background-color: #45a049;
+    }
+
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    /* Popup de confirmation */
+    .confirmation-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .popup-confirm {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .popup-cancel {
+      background-color: #757575;
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .item-content {
+        flex-direction: column;
+      }
+      
+      .item-image, .item-details {
+        min-width: 100%;
+      }
+    }
+  </style>
+
+  <script>
+    document.getElementById('deleteBtn').addEventListener('click', function () {
+      document.getElementById('popup').style.display = 'flex';
+    });
+
+    document.getElementById('confirmDelete').addEventListener('click', function () {
+      document.getElementById('deleteForm').submit();
+    });
+
+    document.getElementById('cancelDelete').addEventListener('click', function () {
+      document.getElementById('popup').style.display = 'none';
+    });
+  </script>
+{% endblock %}

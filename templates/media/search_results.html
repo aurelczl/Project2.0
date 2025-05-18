@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Résultats de recherche pour "{{ query }}"</h2>
+
+  {% if books %}
+    <h3>Livres</h3>
+    <ul>
+      {% for book in books %}
+        <li>{{ book.title }} - {{ book.author }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if movies %}
+    <h3>Films</h3>
+    <ul>
+      {% for movie in movies %}
+        <li>{{ movie.title }} - {{ movie.director }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if series %}
+    <h3>Séries</h3>
+    <ul>
+      {% for serie in series %}
+        <li>{{ serie.title }} - {{ serie.director }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if not books and not movies and not series %}
+    <p>Aucun résultat trouvé.</p>
+  {% endif %}
+{% endblock %}

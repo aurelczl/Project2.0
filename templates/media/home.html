@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Bienvenue sur ta bibliothèque personnelle !</h2>
+  {% if user.is_authenticated %}
+      <p>Bonjour {{ user.username }} ! Tu peux accéder à ton <a href="/profile/">profil</a>.</p>
+  {% else %}
+      <p><a href="/accounts/login/">Connecte-toi</a> ou <a href="/register/">crée un compte</a> pour commencer.</p>
+  {% endif %}
+{% endblock %}

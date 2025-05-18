@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="vintage-auth-container">
+  <div class="vintage-auth-box">
+    <h2 class="vintage-auth-title">
+      <i class="fas fa-sign-in-alt"></i> Connexion
+    </h2>
+
+    {% if form.errors %}
+    <div class="vintage-auth-error">
+      <i class="fas fa-exclamation-circle"></i> Identifiants invalides. Veuillez réessayer.
+    </div>
+    {% endif %}
+
+    <form method="post" class="vintage-auth-form">
+      {% csrf_token %}
+      
+      <div class="vintage-form-group">
+        <label for="id_username" class="vintage-label">
+          <i class="fas fa-user"></i> Nom d'utilisateur
+        </label>
+        <input type="text" name="username" id="id_username" class="vintage-input" required>
+      </div>
+      
+      <div class="vintage-form-group">
+        <label for="id_password" class="vintage-label">
+          <i class="fas fa-lock"></i> Mot de passe
+        </label>
+        <input type="password" name="password" id="id_password" class="vintage-input" required>
+      </div>
+
+      <button type="submit" class="vintage-auth-button">
+        <i class="fas fa-unlock-alt"></i> Se connecter
+      </button>
+    </form>
+
+    <div class="vintage-auth-links">
+      <a href="{% url 'password_reset' %}" class="vintage-link">
+        <i class="fas fa-key"></i> Mot de passe oublié ?
+      </a>
+      <a href="{% url 'register' %}" class="vintage-link">
+        <i class="fas fa-user-plus"></i> Créer un compte
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Conteneur principal */
+  .vintage-auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+    background-color: #f5f1e8;
+  }
+
+  /* Boîte de connexion */
+  .vintage-auth-box {
+    width: 100%;
+    max-width: 450px;
+    padding: 2.5rem;
+    background-color: #e8e0d0;
+    border: 1px solid #8b7a5e;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: 'Times New Roman', serif;
+  }
+
+  /* Titre */
+  .vintage-auth-title {
+    color: #5c4b37;
+    text-align: center;
+    margin-bottom: 1.7rem;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #8b7a5e;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Message d'erreur */
+  .vintage-auth-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #f5c6cb;
+    border-radius: 3px;
+    font-size: 0.9rem;
+  }
+
+  /* Formulaire */
+  .vintage-auth-form {
+    margin-top: 1.5rem;
+  }
+
+  /* Groupe de champs */
+  .vintage-form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Labels */
+  .vintage-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #5c4b37;
+    font-size: 1rem;
+  }
+
+  /* Champs de saisie */
+  .vintage-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #8b7a5e;
+    background-color: #f9f6ee;
+    font-family: 'Times New Roman', serif;
+    font-size: 1rem;
+    color: #3a3226;
+  }
+
+  .vintage-input:focus {
+    outline: none;
+    border-color: #5c4b37;
+    box-shadow: 0 0 0 2px rgba(139, 122, 94, 0.25);
+  }
+
+  /* Bouton de connexion */
+  .vintage-auth-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #8b7a5e;
+    color: #f9f6ee;
+    border: none;
+    font-family: 'Times New Roman', serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 1rem;
+  }
+
+  .vintage-auth-button:hover {
+    background-color: #6b5d4a;
+  }
+
+  /* Liens supplémentaires */
+  .vintage-auth-links {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .vintage-link {
+    display: inline-block;
+    color: #5c4b37;
+    text-decoration: none;
+    margin: 0 0.5rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px dotted #8b7a5e;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+  }
+
+  .vintage-link:hover {
+    color: #3a3226;
+    border-bottom-style: solid;
+  }
+
+  /* Icônes */
+  .fas {
+    margin-right: 0.5rem;
+  }
+</style>
+{% endblock %}
+

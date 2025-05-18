@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="vintage-logout-container">
+  <div class="vintage-logout-box">
+    <div class="vintage-logout-icon">
+      <i class="fas fa-sign-out-alt fa-3x"></i>
+    </div>
+    
+    <h2 class="vintage-logout-title">
+      Vous avez été déconnecté
+    </h2>
+    
+    <p class="vintage-logout-message">
+      Merci pour votre visite. Nous espérons vous revoir bientôt.
+    </p>
+    
+    <div class="vintage-logout-links">
+      <a href="{% url 'login' %}" class="vintage-logout-link">
+        <i class="fas fa-sign-in-alt"></i> Se reconnecter
+      </a>
+      
+      <span class="vintage-logout-separator">|</span>
+      
+      <a href="{% url 'register' %}" class="vintage-logout-link">
+        <i class="fas fa-user-plus"></i> Créer un compte
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Conteneur principal */
+  .vintage-logout-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+    background-color: #f5f1e8;
+    font-family: 'Times New Roman', serif;
+  }
+
+  /* Boîte de déconnexion */
+  .vintage-logout-box {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    padding: 2.5rem;
+    background-color: #e8e0d0;
+    border: 1px solid #8b7a5e;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Icône */
+  .vintage-logout-icon {
+    color: #8b7a5e;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Titre */
+  .vintage-logout-title {
+    color: #5c4b37;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    font-weight: normal;
+    letter-spacing: 1px;
+  }
+
+  /* Message */
+  .vintage-logout-message {
+    color: #7a6a51;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  /* Liens */
+  .vintage-logout-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .vintage-logout-link {
+    color: #5c4b37;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid #8b7a5e;
+    background-color: #f9f6ee;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .vintage-logout-link:hover {
+    background-color: #d4c9b1;
+    color: #3a3226;
+  }
+
+  /* Séparateur */
+  .vintage-logout-separator {
+    color: #8b7a5e;
+    font-weight: bold;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .vintage-logout-box {
+      padding: 1.5rem;
+    }
+    
+    .vintage-logout-links {
+      flex-direction: column;
+    }
+    
+    .vintage-logout-separator {
+      display: none;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="vintage-form-container">
+  <div class="vintage-form-box">
+    <h2 class="vintage-form-title">
+      <i class="fas fa-edit"></i> {{ title }}
+    </h2>
+
+    <form method="post" enctype="multipart/form-data" class="vintage-form">
+      {% csrf_token %}
+
+      <!-- Champs principaux -->
+      {% for field in form.visible_fields %}
+        {% if field.name not in 'raw_genres finished_year finished_month finished_day' %}
+          <div class="vintage-form-group">
+            <label for="{{ field.id_for_label }}" class="vintage-label">
+              {% if field.name == 'title' %}<i class="fas fa-heading"></i>
+              {% elif field.name == 'author' %}<i class="fas fa-user-pen"></i>
+              {% elif field.name == 'image' %}<i class="fas fa-image"></i>
+              {% endif %}
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+              <small class="vintage-help-text">{{ field.help_text }}</small>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Date de fin -->
+      <div class="vintage-date-group">
+        <h3 class="vintage-date-title"><i class="fas fa-calendar-days"></i> Date de fin</h3>
+        <div class="date-fields">
+          <div class="vintage-form-group">
+            <label for="id_finished_year" class="vintage-label">Année</label>
+            {{ form.finished_year }}
+          </div>
+          <div class="vintage-form-group">
+            <label for="id_finished_month" class="vintage-label">Mois</label>
+            {{ form.finished_month }}
+          </div>
+          <div class="vintage-form-group">
+            <label for="id_finished_day" class="vintage-label">Jour</label>
+            {{ form.finished_day }}
+          </div>
+        </div>
+        <button type="button" id="set-today" class="vintage-date-button">
+          <i class="fas fa-calendar-check"></i> Fini aujourd'hui
+        </button>
+      </div>
+
+      <!-- Genres -->
+      <div class="vintage-form-group">
+        <label for="genre-select" class="vintage-label">
+          <i class="fas fa-tags"></i> Genres
+        </label>
+        <select id="genre-select" multiple="multiple" class="vintage-select2">
+          {% for genre in all_genres %}
+            <option value="{{ genre.name }}">{{ genre.name }}</option>
+          {% endfor %}
+        </select>
+        {{ form.raw_genres }}
+      </div>
+
+      <!-- Erreurs -->
+      {% if form.errors %}
+        <div class="vintage-form-errors">
+          <ul>
+            {% for field in form %}
+              {% for error in field.errors %}
+                <li><i class="fas fa-exclamation-circle"></i> <strong>{{ field.label }} :</strong> {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+              <li><i class="fas fa-exclamation-circle"></i> {{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <!-- Bouton de soumission -->
+      <div class="vintage-form-submit">
+        <button type="submit" class="vintage-submit-button">
+          <i class="fas fa-save"></i> Sauvegarder
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+  <style>
+    /* Conteneur principal */
+    .vintage-form-container {
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+      background-color: #f5f1e8;
+      min-height: 100vh;
+    }
+
+    /* Boîte de formulaire */
+    .vintage-form-box {
+      width: 100%;
+      max-width: 700px;
+      padding: 2.5rem;
+      background-color: #e8e0d0;
+      border: 1px solid #8b7a5e;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      font-family: 'Times New Roman', serif;
+    }
+
+    /* Titre */
+    .vintage-form-title {
+      color: #5c4b37;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      border-bottom: 2px solid #8b7a5e;
+      padding-bottom: 0.5rem;
+    }
+
+    /* Groupe de champs */
+    .vintage-form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Labels */
+    .vintage-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #5c4b37;
+      font-size: 1rem;
+    }
+
+    /* Champs de saisie */
+    .vintage-form input[type="text"],
+    .vintage-form input[type="number"],
+    .vintage-form input[type="file"],
+    .vintage-form textarea,
+    .vintage-form select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #8b7a5e;
+      background-color: #f9f6ee;
+      font-family: 'Times New Roman', serif;
+      font-size: 1rem;
+      color: #3a3226;
+    }
+
+    .vintage-form input:focus,
+    .vintage-form textarea:focus,
+    .vintage-form select:focus {
+      outline: none;
+      border-color: #5c4b37;
+      box-shadow: 0 0 0 2px rgba(139, 122, 94, 0.25);
+    }
+
+    /* Groupe date */
+    .vintage-date-group {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background-color: #f9f6ee;
+      border: 1px solid #8b7a5e;
+    }
+
+    .vintage-date-title {
+      color: #5c4b37;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .date-fields {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .vintage-date-button {
+      padding: 0.5rem 1rem;
+      background-color: #8b7a5e;
+      color: #f9f6ee;
+      border: none;
+      font-family: 'Times New Roman', serif;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .vintage-date-button:hover {
+      background-color: #6b5d4a;
+    }
+
+    /* Select2 personnalisé */
+    .vintage-select2 .select2-selection {
+      border: 1px solid #8b7a5e !important;
+      background-color: #f9f6ee !important;
+      min-height: 38px;
+    }
+
+    /* Erreurs */
+    .vintage-form-errors {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #f5c6cb;
+      border-radius: 3px;
+    }
+
+    .vintage-form-errors ul {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+
+    /* Bouton de soumission */
+    .vintage-submit-button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #8b7a5e;
+      color: #f9f6ee;
+      border: none;
+      font-family: 'Times New Roman', serif;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .vintage-submit-button:hover {
+      background-color: #6b5d4a;
+    }
+
+    /* Icônes */
+    .fas {
+      margin-right: 0.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .date-fields {
+        grid-template-columns: 1fr;
+      }
+      
+      .vintage-form-box {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const btn = document.getElementById("set-today");
+      if (btn) {
+         btn.addEventListener("click", function() {
+            const today = new Date();
+            document.getElementById("id_finished_year").value = today.getFullYear();
+            document.getElementById("id_finished_month").value = today.getMonth() + 1;
+            document.getElementById("id_finished_day").value = today.getDate();
+         });
+      }
+
+      // Initialisation de Select2 avec style vintage
+      const initialGenres = "{{ form.initial.raw_genres|default:'' }}".split(',');
+      
+      $('#genre-select').select2({
+        tags: true,
+        tokenSeparators: [','],
+        placeholder: "Choisissez ou ajoutez des genres",
+        allowClear: true,
+        width: '100%',
+        data: initialGenres.map(g => ({ id: g, text: g })),
+        dropdownParent: $('.vintage-form-box'),
+        theme: 'vintage-select2'
+      });
+
+      $('#genre-select').val(initialGenres).trigger('change');
+
+      $('form').on('submit', function () {
+        const selected = $('#genre-select').val();
+        $('input[name="raw_genres"]').val(selected ? selected.join(',') : '');
+      });
+    });
+  </script>
+{% endblock %}

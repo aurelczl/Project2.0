@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Ma Bibliothèque{% endblock %}</title>
+    
+    <style>
+        /* Style global vintage */
+        body {
+            margin: 0;
+            font-family: 'Times New Roman', serif;
+            background-color: #f5f1e8;
+            color: #3a3226;
+        }
+
+        /* Header vintage */
+        header {
+            text-align: center;
+            padding: 15px 0;
+            background-color: #e8e0d0;
+            border-bottom: 3px double #8b7a5e;
+        }
+
+        /* Titre principal */
+        header h1 {
+            margin: 10px 0;
+            padding: 10px 0;
+            font-size: 2.5rem;
+            color: #5c4b37;
+            font-weight: normal;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            font-family: 'Times New Roman', serif;
+        }
+
+        /* Bande décorative vintage */
+        .header-band {
+            height: 30px;
+            background: repeating-linear-gradient(
+                45deg,
+                #d4c9b1,
+                #d4c9b1 10px,
+                #c5b89b 10px,
+                #c5b89b 20px
+            );
+            margin: 5px 0;
+            border-top: 1px solid #8b7a5e;
+            border-bottom: 1px solid #8b7a5e;
+        }
+
+        /* Navigation vintage */
+        nav {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: #d4c9b1;
+            border-top: 1px solid #8b7a5e;
+        }
+
+        /* Liens de navigation */
+        nav a {
+            color: #3a3226;
+            text-decoration: none;
+            padding: 8px 20px;
+            margin: 0 5px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        nav a:hover {
+            color: #5c4b37;
+            border-bottom: 1px solid #8b7a5e;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        /* Bouton déconnexion */
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #3a3226;
+            cursor: pointer;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            padding: 8px 20px;
+            margin: 0 5px;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Contenu principal */
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* Style pour le formulaire de déconnexion */
+        .logout-form {
+            display: inline;
+        }
+    </style>
+
+    <!-- CSS Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- JS Select2 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</head>
+<body>
+    <header>
+        <!-- Bande décorative supérieure -->
+        <div class="header-band"></div>
+
+        <h1><i class="fas fa-book-open"></i> MA LIBRARY <i class="fas fa-book-open"></i></h1>
+
+        <!-- Bande décorative inférieure -->
+        <div class="header-band"></div>
+
+        <nav>
+            <a href="/"><i class="fas fa-home"></i> Accueil</a>
+            
+            {% if user.is_authenticated %}
+                <a href="/profile/"><i class="fas fa-user"></i> Mon profil</a>
+                <form action="{% url 'logout' %}" method="post" class="logout-form">
+                   {% csrf_token %}
+                   <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+                </form>
+            {% else %}
+                <a href="/accounts/login/"><i class="fas fa-sign-in-alt"></i> Connexion</a>
+                <a href="/register/"><i class="fas fa-user-plus"></i> Inscription</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
