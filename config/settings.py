@@ -11,27 +11,35 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import sys
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Déterminer si on est en production (sur Render)
+RENDER = os.getenv('RENDER', 'False').lower() == 'true'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-#Par défaut :
-SECRET_KEY = 'django-insecure-6vh4^1ru^zqxf9(@&7t2^+3l54rd)%vx@t)h8-=($k+hkfy84s'
-
-#Pour render
-#SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+# SECURITY WARNING: keep the secret key used in production secret!
+if RENDER:
+    SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+else:
+    SECRET_KEY = 'django-insecure-6vh4^1ru^zqxf9(@&7t2^+3l54rd)%vx@t)h8-=($k+hkfy84s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not RENDER
 
-ALLOWED_HOSTS = []
-
+# Configuration des hosts autorisés
+if RENDER:
+    ALLOWED_HOSTS = [os.getenv('RENDER_EXTERNAL_HOSTNAME'), 'localhost', '127.0.0.1']
+else:
+    ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -47,6 +55,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Ajout pour Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,27 +90,21 @@ LOGIN_REDIRECT_URL = '/profile/'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-#Par défaut :
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if RENDER:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600
+        )
     }
-}
-
-# Pour render :
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db_name',  # Nom de la base de données
-        'USER': 'db_user',  # Utilisateur de la base de données
-        'PASSWORD': 'db_password',  # Mot de passe
-        'HOST': 'localhost',  # Ou l'adresse de la base de données sur Render
-        'PORT': '5432',
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}"""
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -139,13 +142,31 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+if RENDER:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-import os
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Security settings (production only)
+if RENDER:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
 
