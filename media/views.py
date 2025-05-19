@@ -2,12 +2,26 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Book, Series, Movie, Genre
 from .forms import BookForm, SeriesForm, MovieForm
-from django.http import Http404
+from django.http import Http404, JsonResponse
 
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.db.models import Q
+import json
 
+# Gestion des données local pour render :
+
+@csrf_exempt
+def load_data(request):
+    if request.method == 'POST':
+        try:
+            from django.core.management import call_command
+            call_command('loaddata', 'data.json')
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+        
 # Create your views here.
 
 def home(request):

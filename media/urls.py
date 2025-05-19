@@ -22,6 +22,7 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('genre/add/', views.add_genre, name='add_genre'),
     path('library/', views.library_view, name='library'),
+    path('admin/load_data/', views.load_data, name='load_data'),
 
 
 ]
