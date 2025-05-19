@@ -26,7 +26,6 @@ RENDER = os.getenv('RENDER', 'False').lower() == 'true'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-# SECURITY WARNING: keep the secret key used in production secret!
 if RENDER:
     SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 else:
@@ -94,7 +93,8 @@ if RENDER:
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
-            conn_max_age=600
+            conn_max_age=600,
+            ssl_require=True
         )
     }
 else:
