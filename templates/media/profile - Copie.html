@@ -41,7 +41,7 @@
   {% for item in items %}
     {% if item.image %}
       <a href="{% url 'item_detail' model_name=item.model_name item_id=item.id %}">
-        <img src="https://res.cloudinary.com/{{ cloudinary_name }}/image/upload/{{ item.image.name }}"
+        <img src="{{ item.image.url }}"
              alt="{{ item.title }}"
              data-category="{{ item.model_name }}"
              data-genres="{{ item.genres.all|join:',' }}"
