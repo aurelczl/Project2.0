@@ -29,7 +29,7 @@ class Book(models.Model):
                                       null=True,blank=True,default=0,
                                       help_text="Note entre 0 et 100")
     #image = models.ImageField(upload_to='book_images/', blank=True, null=True)
-    image = models.ImageField(upload_to='media/')
+    image = models.ImageField(upload_to='')
 
     def __str__(self):
         return self.title
