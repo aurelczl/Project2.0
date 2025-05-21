@@ -28,8 +28,12 @@ class Book(models.Model):
                                                   MaxValueValidator(100)],
                                       null=True,blank=True,default=0,
                                       help_text="Note entre 0 et 100")
-    #image = models.ImageField(upload_to='book_images/', blank=True, null=True)
-    image = models.ImageField(upload_to='')
+    if RENDER:
+        upload_path = ''  # Cloudinary n’utilise pas vraiment ce chemin
+    else:
+        upload_path = 'book_images/'
+    image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+    
 
     def __str__(self):
         return self.title
@@ -51,7 +55,12 @@ class Series(models.Model):
                                       help_text="Note entre 0 et 100")
     #global_rate = models.DecimalField(max_digits=3, decimal_places=0, blank=True, null=True, default=0)
     genres = models.ManyToManyField(Genre, blank=True)
-    image = models.ImageField(upload_to='series_images/', blank=True, null=True)
+    if RENDER:
+        upload_path = ''  # Cloudinary n’utilise pas vraiment ce chemin
+    else:
+        upload_path = 'series_images/'
+    image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+    
 
     def __str__(self):
         return self.title
@@ -70,7 +79,11 @@ class Movie(models.Model):
                                       null=True,blank=True,default=0,
                                       help_text="Note entre 0 et 100")
     #global_rate = models.DecimalField(max_digits=3, decimal_places=0, blank=True, null=True, default=0) 
-    image = models.ImageField(upload_to='movie_images/', blank=True, null=True)
-
+        if RENDER:
+        upload_path = ''  # Cloudinary n’utilise pas vraiment ce chemin
+    else:
+        upload_path = 'movie_images/'
+    image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+    
     def __str__(self):
         return self.title
