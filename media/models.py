@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+import os
+
+RENDER = os.getenv('RENDER', 'False').lower() == 'true'
+
 # Create your models here.
 
 class Genre(models.Model):
@@ -24,7 +28,8 @@ class Book(models.Model):
                                                   MaxValueValidator(100)],
                                       null=True,blank=True,default=0,
                                       help_text="Note entre 0 et 100")
-    image = models.ImageField(upload_to='book_images/', blank=True, null=True)
+    #image = models.ImageField(upload_to='book_images/', blank=True, null=True)
+    image = models.ImageField(upload_to='media/')
 
     def __str__(self):
         return self.title
