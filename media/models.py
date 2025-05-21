@@ -79,7 +79,7 @@ class Movie(models.Model):
                                       null=True,blank=True,default=0,
                                       help_text="Note entre 0 et 100")
     #global_rate = models.DecimalField(max_digits=3, decimal_places=0, blank=True, null=True, default=0) 
-        if RENDER:
+    if RENDER:
         upload_path = ''  # Cloudinary n’utilise pas vraiment ce chemin
     else:
         upload_path = 'movie_images/'
