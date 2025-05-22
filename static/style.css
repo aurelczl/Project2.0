@@ -1,0 +1,598 @@
+/* Style global vintage */
+        body {
+            margin: 0;
+            font-family: 'Times New Roman', serif;
+            background-color: #f5f1e8;
+            color: #3a3226;
+        }
+
+        /* Header vintage */
+        header {
+            text-align: center;
+            padding: 15px 0;
+            background-color: #e8e0d0;
+            border-bottom: 3px double #8b7a5e;
+        }
+
+        /* Titre principal */
+        header h1 {
+            margin: 10px 0;
+            padding: 10px 0;
+            font-size: 2.5rem;
+            color: #5c4b37;
+            font-weight: normal;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            font-family: 'Times New Roman', serif;
+        }
+
+        /* Bande décorative vintage */
+        .header-band {
+            height: 30px;
+            background: repeating-linear-gradient(
+                45deg,
+                #d4c9b1,
+                #d4c9b1 10px,
+                #c5b89b 10px,
+                #c5b89b 20px
+            );
+            margin: 5px 0;
+            border-top: 1px solid #8b7a5e;
+            border-bottom: 1px solid #8b7a5e;
+        }
+
+        /* Navigation vintage */
+        nav {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: #d4c9b1;
+            border-top: 1px solid #8b7a5e;
+        }
+
+        /* Liens de navigation */
+        nav a {
+            color: #3a3226;
+            text-decoration: none;
+            padding: 8px 20px;
+            margin: 0 5px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        nav a:hover {
+            color: #5c4b37;
+            border-bottom: 1px solid #8b7a5e;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        /* Bouton déconnexion */
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #3a3226;
+            cursor: pointer;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            padding: 8px 20px;
+            margin: 0 5px;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Contenu principal */
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* Style pour le formulaire de déconnexion */
+        .logout-form {
+            display: inline;
+        }
+
+/* Conteneur principal */
+    .vintage-library-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f1e8;
+        font-family: 'Times New Roman', serif;
+    }
+
+    /* Titre */
+    .vintage-library-title {
+        color: #5c4b37;
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 2rem;
+        border-bottom: 2px solid #8b7a5e;
+        padding-bottom: 10px;
+    }
+
+    /* Filtres */
+    .vintage-filters {
+        background-color: #e8e0d0;
+        padding: 15px;
+        border: 1px solid #8b7a5e;
+        margin-bottom: 25px;
+    }
+
+    .vintage-filter-group {
+        margin-bottom: 15px;
+    }
+
+    .vintage-filter-title {
+        color: #5c4b37;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    /* Checkbox de genres */
+    .vintage-checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .vintage-genre-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .vintage-genre-checkbox {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #8b7a5e;
+        background-color: #f9f6ee;
+        margin-right: 6px;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .vintage-genre-checkbox:checked {
+        background-color: #8b7a5e;
+    }
+
+    .vintage-genre-checkbox:checked::after {
+        content: "✓";
+        position: absolute;
+        color: #f9f6ee;
+        font-size: 12px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .vintage-genre-text {
+        color: #3a3226;
+        font-size: 0.9rem;
+    }
+
+
+    /* Style vintage */
+    .vintage-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: #f5f1e8;
+      font-family: 'Times New Roman', serif;
+      color: #3a3226;
+      border: 1px solid #d4c9b1;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    .vintage-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #d4c9b1;
+    }
+
+    .vintage-header h1 {
+      font-size: 2.2rem;
+      color: #5c4b37;
+      margin-bottom: 0.5rem;
+      font-weight: normal;
+      letter-spacing: 1px;
+    }
+
+    .vintage-subtitle {
+      font-size: 1.1rem;
+      color: #7a6a51;
+      font-style: italic;
+    }
+
+    .vintage-search {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background-color: #e8e0d0;
+      border: 1px solid #d4c9b1;
+      border-radius: 3px;
+    }
+
+    .search-box {
+      display: flex;
+      margin-bottom: 1rem;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 0.7rem;
+      border: 1px solid #b8a98f;
+      background-color: #f9f6ee;
+      font-family: 'Times New Roman', serif;
+      font-size: 1rem;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #8b7a5e;
+    }
+
+    .vintage-button {
+      display: inline-block;
+      padding: 0.7rem 1.2rem;
+      margin: 0.3rem;
+      border: 1px solid #b8a98f;
+      background-color: #d4c9b1;
+      color: #3a3226;
+      text-decoration: none;
+      font-family: 'Times New Roman', serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .vintage-button:hover {
+      background-color: #c5b89b;
+      border-color: #8b7a5e;
+    }
+
+    .search-btn {
+      background-color: #8b7a5e;
+      color: #f9f6ee;
+      border: none;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .vintage-select {
+      flex: 1;
+      padding: 0.7rem;
+      border: 1px solid #b8a98f;
+      background-color: #f9f6ee;
+      font-family: 'Times New Roman', serif;
+      font-size: 1rem;
+      color: #3a3226;
+    }
+
+    .vintage-actions {
+      margin-bottom: 2rem;
+    }
+
+    .vintage-section-title {
+      font-size: 1.5rem;
+      color: #5c4b37;
+      border-bottom: 1px solid #d4c9b1;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: normal;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .book-btn { background-color: #d9c7a7; }
+    .movie-btn { background-color: #c4b393; }
+    .series-btn { background-color: #b8a98f; }
+    .library-btn { background-color: #8b7a5e; color: #f9f6ee; }
+
+    .vintage-stats {
+      padding: 1.5rem;
+      background-color: #e8e0d0;
+      border: 1px solid #d4c9b1;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .vintage-stat {
+      text-align: center;
+      padding: 1rem;
+      background-color: #f9f6ee;
+      border: 1px solid #d4c9b1;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 1.8rem;
+      color: #5c4b37;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #7a6a51;
+    }
+
+    /* Icônes Font Awesome */
+    .fas {
+      margin-right: 0.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .filter-row {
+        flex-direction: column;
+      }
+      
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+
+.bibli-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  background: #eee;
+}
+
+.bibli-item {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.bibli-item img {
+  display: block;
+  transition: opacity 0.3s ease;
+  border-radius: 8px;
+}
+
+.bibli-item:hover img {
+  opacity: 0.6;
+}
+
+.note-overlay {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #000;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 14px;
+  display: none;
+}
+
+.bibli-item:hover .note-overlay {
+  display: block;
+}
+
+    }
+
+/* DETAIL_ITEM */
+
+/* Conteneur principal */
+    .item-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Titre */
+    .item-title {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2em;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    /* Contenu (image + détails) */
+    .item-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    /* Image */
+    .item-image {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .item-image img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Détails */
+    .item-details {
+      flex: 2;
+      min-width: 300px;
+    }
+
+    .details-section {
+      margin-bottom: 20px;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .detail-label {
+      font-weight: bold;
+      min-width: 150px;
+      color: #555;
+    }
+
+    .detail-value {
+      flex: 1;
+      color: #333;
+    }
+
+    /* Tags de genres */
+    .genre-tag {
+      display: inline-block;
+      background: #e0e0e0;
+      padding: 3px 8px;
+      border-radius: 15px;
+      font-size: 0.9em;
+      margin-right: 5px;
+    }
+
+    /* Boutons d'action */
+    .item-actions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .edit-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background-color: #45a049;
+    }
+
+    .delete-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    /* Popup de confirmation */
+    .confirmation-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .popup-confirm {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .popup-cancel {
+      background-color: #757575;
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .item-content {
+        flex-direction: column;
+      }
+      
+      .item-image, .item-details {
+        min-width: 100%;
+      }
+    }
+
+/* LIBRARY.html */
+
+/* Grille pour les collections */
+    .collections {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    
+    .collection-item {
+        border: 1px solid #ddd;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .collection-item img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+    
+    /* Formulaire de recherche */
+    .search-form {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+    
+    .search-form input, .search-form select {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    /* Boutons d'ajout */
+    .add-buttons {
+        display: flex;
+        gap: 2rem;
+        margin: 1rem 0;
+    }
