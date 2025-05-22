@@ -10,7 +10,7 @@ class BookForm(forms.ModelForm):
 
     class Meta:
         model = Book
-        fields = ['title', 'author', 'read','finished_year','finished_month','finished_day', 'edition', 'global_rate', 'image']
+        fields = ['title', 'author', 'read','finished_year','finished_month','finished_day', 'edition', 'global_rate', 'image', 'image_cloud']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

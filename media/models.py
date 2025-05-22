@@ -34,7 +34,7 @@ class Book(models.Model):
     else:
         upload_path = 'book_images/'
     image = models.ImageField(upload_to=upload_path, blank=True, null=True)
-    
+    image_cloud = CloudinaryField("image", blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -61,7 +61,6 @@ class Series(models.Model):
     else:
         upload_path = 'series_images/'
     image = models.ImageField(upload_to=upload_path, blank=True, null=True)
-    
 
     def __str__(self):
         return self.title
