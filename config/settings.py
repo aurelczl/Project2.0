@@ -181,4 +181,10 @@ if RENDER:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = 'DENY'
-
+    
+else :
+    cloudinary.config(
+        cloud_name = "dguuomepe",
+        api_key = "835639251737626",
+        api_secret = "wWpfVhqTGxFwF5-iPrLhUvE4X9Y",
+    )
