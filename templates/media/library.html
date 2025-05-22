@@ -18,8 +18,31 @@
                     <img src="{{ book.image.url }}" alt="{{ book.title }}">
                 </a>
             {% else %}
-                <p>{{ book.title }}</p>
+                <p>
+        	  <a href="{% url 'item_detail' model_name='book' item_id=book.id %}">
+                     {{ book.title }}
+     	          </a>
+ 	        </p>
                 <p><small>{{ book.author }}</small></p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2>Mes Mangas</h2>
+    <div class="collections">
+        {% for manga in mangas %}
+        <div class="collection-item">
+            {% if manga.image %}
+                <a href="{% url 'item_detail' model_name='manga' item_id=manga.id %}">
+                    <img src="{{ manga.image.url }}" alt="{{ manga.title }}">
+                </a>
+            {% else %}
+                <p>
+        	  <a href="{% url 'item_detail' model_name='manga' item_id=manga.id %}">
+                     {{ manga.title }}
+     	          </a>
+ 	        </p>
             {% endif %}
         </div>
         {% endfor %}
@@ -34,9 +57,12 @@
           <img src="{{ serie.image.url }}" alt="{{ serie.title }}" style="height:150px;">
           </a>
         {% else %}
-          {{ serie.title }} - {{ serie.author }}
+          <p>
+             <a href="{% url 'item_detail' model_name='series' item_id=serie.id %}">
+                {{ serie.title }}
+     	     </a>
+ 	  </p>
         {% endif %}
-        {% if serie.read %}(vu){% endif %}
       </div>
     {% endfor %}
   </div>
@@ -50,7 +76,11 @@
            <img src="{{ m.image.url }}" alt="{{ m.title }}" style="height:150px;">
           </a>
         {% else %}
-          {{ m.title }} - {{ m.director }}
+          <p>
+             <a href="{% url 'item_detail' model_name='movie' item_id=m.id %}">
+                {{ m.title }}
+     	     </a>
+ 	  </p
         {% endif %}
       </div>
     {% endfor %}
