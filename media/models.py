@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 import os
+from cloudinary.models import CloudinaryField
 
 RENDER = os.getenv('RENDER', 'False').lower() == 'true'
 
