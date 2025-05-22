@@ -31,10 +31,10 @@ class Book(models.Model):
                                       help_text="Note entre 0 et 100")
     if RENDER:
         upload_path = ''  # Cloudinary n’utilise pas vraiment ce chemin
+        image = CloudinaryField("image", blank=True, null=True)
     else:
         upload_path = 'book_images/'
-    image = models.ImageField(upload_to=upload_path, blank=True, null=True)
-    image_cloud = CloudinaryField("image", blank=True, null=True)
+        image = models.ImageField(upload_to=upload_path, blank=True, null=True)
 
     def __str__(self):
         return self.title
