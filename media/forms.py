@@ -1,7 +1,68 @@
 from django import forms
-from .models import Book, Series, Movie, Genre
+from .models import Book, Series, Movie, Manga, Genre
 import datetime
 
+class MangaForm(forms.ModelForm):
+    raw_genres = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
+
+    class Meta:
+        model = Manga
+        fields = ['title', 'finished_year',
+                  'finished_month','finished_day',
+                  'global_rate', 'image']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        year = cleaned_data.get('finished_year')
+        month = cleaned_data.get('finished_month')
+        day = cleaned_data.get('finished_day')
+
+        if day and (not month or not year):
+            raise forms.ValidationError("Si vous indiquez un jour, le mois et l’année doivent aussi être renseignés.")
+        if month and not year:
+            raise forms.ValidationError("Si vous indiquez un mois, l’année doit être renseignée.")
+
+        # Optionnel : vérifier que la date est valide
+        if year and month and day:
+            try:
+                datetime.date(year, month, day)
+            except ValueError:
+                raise forms.ValidationError("La date saisie n'est pas valide.")
+
+        return cleaned_data
+    
+    def clean_global_rate(self):
+        rate = self.cleaned_data.get('global_rate')
+        if rate is not None and (rate < 0 or rate > 100):
+            raise ValidationError("La note doit être comprise entre 0 et 100.")
+        return rate
+    
+    def clean_raw_genres(self):
+        raw = self.cleaned_data.get('raw_genres', '')
+        names = [name.strip() for name in raw.split(',') if name.strip()]
+        genres = []
+        for name in names:
+            genre, _ = Genre.objects.get_or_create(name=name)
+            genres.append(genre)
+        return genres
+
+    def save(self, user, commit=True):
+        manga = super().save(commit=False)
+        manga.user = user
+        if commit:
+            manga.save()
+
+        # genres = self.cleaned_data.get('genres') ne marche plus
+        genres = self.cleaned_data.get('raw_genres', [])
+        manga.genres.set(genres)
+        return manga
+    
 class BookForm(forms.ModelForm):
     raw_genres = forms.CharField(
         widget=forms.HiddenInput(),

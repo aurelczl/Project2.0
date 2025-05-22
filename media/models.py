@@ -15,10 +15,30 @@ class Genre(models.Model):
     def __str__(self):
         return self.name
 
+class Manga(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    genres = models.ManyToManyField(Genre, blank=True)
+    finished_year = models.PositiveIntegerField(blank=True, null=True)
+    finished_month = models.PositiveIntegerField(blank=True, null=True)
+    finished_day = models.PositiveIntegerField(blank=True, null=True)
+    global_rate = models.IntegerField(validators=[MinValueValidator(0),
+                                                  MaxValueValidator(100)],
+                                      null=True,blank=True,default=0,
+                                      help_text="Note entre 0 et 100")
+    if RENDER:
+        image = CloudinaryField("image", blank=True, null=True)
+    else:
+        upload_path = 'manga_images/'
+        image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+    
 class Book(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    author = models.CharField(max_length=100)
+    author = models.CharField(max_length=100, blank=True, null=True)
     read = models.BooleanField(default=False)
     genres = models.ManyToManyField(Genre, blank=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
@@ -67,7 +87,7 @@ class Series(models.Model):
 class Movie(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    director = models.CharField(max_length=100)
+    director = models.CharField(max_length=100, blank=True, null=True)
     watched = models.BooleanField(default=False)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)

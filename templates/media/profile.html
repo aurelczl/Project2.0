@@ -8,10 +8,6 @@
       <p class="vintage-subtitle">Votre collection personnelle</p>
     </div>
 
-    <h2 class="vintage-library-title">
-        <i class="fas fa-book-open"></i> Images cloudinary ici (test)
-    </h2>
-
     <div class="vintage-library-container">
     <h2 class="vintage-library-title">
         <i class="fas fa-book-open"></i> Ma Bibliothèque Visuelle
@@ -25,6 +21,7 @@
                 <button class="vintage-filter-btn filter-btn" data-category="book" onclick="filterItems()">Livres</button>
                 <button class="vintage-filter-btn filter-btn" data-category="movie" onclick="filterItems()">Films</button>
                 <button class="vintage-filter-btn filter-btn" data-category="series" onclick="filterItems()">Séries</button>
+		<button class="vintage-filter-btn filter-btn" data-category="manga" onclick="filterItems()">Mangas</button>
             </div>
         </div>
 
@@ -61,13 +58,16 @@
       <h2 class="vintage-section-title">Actions</h2>
       <div class="action-buttons">
         <a href="{% url 'add_book' %}" class="vintage-button book-btn">
-          <i class="fas fa-book"></i> Ajouter livre
+          <i class="fas fa-book"></i> Ajouter un livre
         </a>
         <a href="{% url 'add_movie' %}" class="vintage-button movie-btn">
-          <i class="fas fa-film"></i> Ajouter film
+          <i class="fas fa-film"></i> Ajouter un film
         </a>
         <a href="{% url 'add_series' %}" class="vintage-button series-btn">
-          <i class="fas fa-tv"></i> Ajouter série
+          <i class="fas fa-tv"></i> Ajouter une série
+        </a>
+	<a href="{% url 'add_manga' %}" class="vintage-button series-btn">
+          <i class="fas fa-tv"></i> Ajouter un Manga
         </a>
         <a href="{% url 'library' %}" class="vintage-button library-btn">
           <i class="fas fa-book-open"></i> Voir collection
@@ -82,6 +82,10 @@
         <div class="vintage-stat">
           <span class="stat-number">{{ num_books }}</span>
           <span class="stat-label">Livres</span>
+        </div>
+	<div class="vintage-stat">
+          <span class="stat-number">{{ num_mangas }}</span>
+          <span class="stat-label">Mangas</span>
         </div>
         <div class="vintage-stat">
           <span class="stat-number">{{ num_movies }}</span>

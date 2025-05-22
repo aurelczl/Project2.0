@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Book, Series, Movie, Genre
-from .forms import BookForm, SeriesForm, MovieForm
+from .models import Book, Series, Movie, Manga, Genre
+from .forms import BookForm, SeriesForm, MovieForm, MangaForm
 from django.http import Http404, JsonResponse
 
 from django.views.decorators.csrf import csrf_exempt
@@ -43,11 +43,13 @@ def library_view(request):
     books = Book.objects.filter(user=request.user)
     series = Series.objects.filter(user=request.user)
     movies = Movie.objects.filter(user=request.user)
+    mangas = Manga.objects.filter(user=request.user)
 
     return render(request, 'media/library.html', {
         'books': books,
         'series': series,
         'movies': movies,
+        'mangas': mangas,
     })
 
 @login_required
@@ -55,7 +57,8 @@ def edit_item(request, model_name, item_id):
     model_mapping = {
         'book': Book,
         'movie': Movie,
-        'series': Series
+        'series': Series,
+        'manga': Manga,
     }
 
     model_class = model_mapping.get(model_name.lower())
@@ -67,7 +70,8 @@ def edit_item(request, model_name, item_id):
     form_class = {
         Book: BookForm,
         Movie: MovieForm,
-        Series: SeriesForm
+        Series: SeriesForm,
+        Manga: MangaForm
     }.get(model_class)
 
     if request.method == 'POST':
@@ -89,7 +93,8 @@ def delete_item(request, model_name, item_id):
     model_mapping = {
         'book': Book,
         'movie': Movie,
-        'series': Series
+        'series': Series,
+        'manga': Manga,
     }
 
     model_class = model_mapping.get(model_name.lower())
@@ -118,7 +123,9 @@ def search(request):
     content_type = request.GET.get('type', 'all')
 
     books = movies = series = []
-
+    
+    print("on utilise la fonction search de view")
+    
     if query:
         if content_type == 'book' or content_type == 'all':
             books = Book.objects.filter(
@@ -149,13 +156,15 @@ def profile(request):
     books = Book.objects.filter(user=request.user)
     series = Series.objects.filter(user=request.user)
     movies = Movie.objects.filter(user=request.user)
+    mangas = Manga.objects.filter(user=request.user)
     all_genres = Genre.objects.all()
     
     num_books = books.count()
     num_series = series.count()
     num_movies = movies.count()
+    num_mangas = mangas.count()
 
-    all_items = list(books) + list(movies) + list(series)
+    all_items = list(books) + list(movies) + list(series)+ list(mangas)
 
     # Ajoute un attribut model_name à chaque item
     for book in books:
@@ -164,6 +173,8 @@ def profile(request):
         serie.model_name = 'series'
     for movie in movies:
         movie.model_name = 'movie'
+    for manga in mangas:
+        manga.model_name = 'manga'
 
     # Calculer une taille max basée sur la note (global_rate), min 50px max 150px
     for item in all_items:
@@ -178,9 +189,11 @@ def profile(request):
         'books': books,
         'series': series,
         'movies': movies,
+        'mangas': mangas,
         'num_books': num_books,
         'num_series': num_series,
         'num_movies': num_movies,
+        'num_mangas': num_mangas,
         'all_genres': all_genres,
         'items': all_items
     })
@@ -190,12 +203,16 @@ def home(request):
     books = Book.objects.filter(user=request.user)
     series = Series.objects.filter(user=request.user)
     movies = Movie.objects.filter(user=request.user)
-    return render(request, 'media/home.html', {'books': books, 'series': series, 'movies': movies})
+    mangas = Manga.objects.filter(user=request.user)
+    return render(request, 'media/home.html',
+                  {'books': books, 'series': series,
+                   'movies': movies, 'manga': mangas})
 
 MODEL_MAP = {
     'book': (Book, BookForm),
     'movie': (Movie, MovieForm),
     'series': (Series, SeriesForm),
+    'manga': (Manga, MangaForm)
 }
 
 def item_detail(request, model_name, item_id):
@@ -212,6 +229,25 @@ def item_detail(request, model_name, item_id):
         'instance': instance,
         'form': form,
         'model_name': model_name,
+    })
+
+@login_required
+def add_manga(request):
+    if request.method == 'POST':
+        form = MangaForm(request.POST, request.FILES)
+        if form.is_valid():
+            manga = form.save(user=request.user)
+            return redirect('profile')
+    else:
+        form = MangaForm()
+    
+    # Envoie tous les genres pour peupler la liste Select2
+    all_genres = Genre.objects.all()
+
+    return render(request, 'media/add_item.html', {
+        'form': form,
+        'title': 'Ajouter un livre',
+        'all_genres': all_genres
     })
 
 @login_required
