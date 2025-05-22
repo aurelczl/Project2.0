@@ -184,8 +184,8 @@ if RENDER:
 """
 else :
     cloudinary.config(
-        cloud_name = "dguuomepe",
-        api_key = "835639251737626",
-        api_secret = "wWpfVhqTGxFwF5-iPrLhUvE4X9Y",
+        cloud_name = ,
+        api_key = ,
+        api_secret = ,
     )
 """
