@@ -52,23 +52,6 @@
   {% endfor %}
 </div>
 
-<h2 class="section-title">Ma bibliothèque visuelle</h2>
-
-<div id="bibli-container" class="masonry-grid">
-  {% for item in items %}
-    {% if item.image %}
-      <div class="masonry-item" 
-           data-category="{{ item.model_name }}"
-           data-genres="{{ item.genres.all|join:',' }}">
-        <a href="{% url 'item_detail' model_name=item.model_name item_id=item.id %}">
-          <img src="{{ item.image.url }}" 
-               alt="{{ item.title }}"
-               style="height: {{ item.display_size }}px;">
-        </a>
-      </div>
-    {% endif %}
-  {% endfor %}
-</div>
 
     <!-- Boutons d'action ! -->
     <div class="vintage-actions">
@@ -116,18 +99,6 @@
     </div>
   </div>
   
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const grid = document.querySelector('.masonry-grid');
-      new Masonry(grid, {
-        itemSelector: '.masonry-item',
-        columnWidth: 100,  // adapt to your base size
-        gutter: 10,
-        fitWidth: true
-      });
-    });
-  </script>
-
   <script>
   function filterItems() {
     // Récupérer catégorie sélectionnée
@@ -194,8 +165,6 @@
     filterItems();
   };
 </script>
-
-<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
 
   <!-- Font Awesome pour les icônes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

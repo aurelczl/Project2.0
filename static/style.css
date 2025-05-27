@@ -332,6 +332,23 @@
       color: #7a6a51;
     }
 
+    /* Pèle mèle ajout avec extension mason*/
+    .masonry-grid {
+      width: 100%;
+      margin: auto;
+    }
+
+    .masonry-item {
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .masonry-item img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
     /* Icônes Font Awesome */
     .fas {
       margin-right: 0.5rem;
@@ -554,6 +571,18 @@
         min-width: 100%;
       }
     }
+
+    @media (max-width: 900px) {
+      .pele-mele-grid {
+        column-count: 3;
+      }
+    }
+    @media (max-width: 600px) {
+      .pele-mele-grid {
+        column-count: 2;
+      }
+    }
+
 
 /* LIBRARY.html */
 
