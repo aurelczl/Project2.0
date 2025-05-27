@@ -336,10 +336,12 @@
     .masonry-grid {
       width: 100%;
       margin: auto;
+      column-gap: 1em;
     }
 
     .masonry-item {
       margin-bottom: 10px;
+      break-inside: avoid;
       transition: transform 0.3s ease;
     }
 
@@ -571,18 +573,6 @@
         min-width: 100%;
       }
     }
-
-    @media (max-width: 900px) {
-      .pele-mele-grid {
-        column-count: 3;
-      }
-    }
-    @media (max-width: 600px) {
-      .pele-mele-grid {
-        column-count: 2;
-      }
-    }
-
 
 /* LIBRARY.html */
 

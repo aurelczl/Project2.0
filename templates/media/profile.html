@@ -52,7 +52,10 @@
   {% endfor %}
 </div>
 
-<h2 class="section-title">Ma bibliothèque visuelle</h2>
+<div class="vintage-library-container">
+    <h2 class="vintage-library-title">
+        <i class="fas fa-book-open"></i> Test Pèle-mêle
+    </h2>
 
 <div id="bibli-container" class="masonry-grid">
   {% for item in items %}
@@ -116,14 +119,17 @@
     </div>
   </div>
   
+  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const grid = document.querySelector('.masonry-grid');
       new Masonry(grid, {
         itemSelector: '.masonry-item',
-        columnWidth: 100,  // adapt to your base size
+        //columnWidth: 100,  // adapt to your base size
         gutter: 10,
-        fitWidth: true
+        fitWidth: true,
+        percentPosition: true,
       });
     });
   </script>
@@ -194,8 +200,6 @@
     filterItems();
   };
 </script>
-
-<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
 
   <!-- Font Awesome pour les icônes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
