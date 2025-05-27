@@ -295,11 +295,12 @@
       gap: 1rem;
     }
 
-    .book-btn { background-color: #d9c7a7; }
-    .movie-btn { background-color: #c4b393; }
-    .series-btn { background-color: #b8a98f; }
-    .library-btn { background-color: #8b7a5e; color: #f9f6ee; }
-
+    .book-btn { background-color: #d9c7a7; }  /* Beige clair (papier vieilli) */
+    .movie-btn { background-color: #c4b393; }  /* Beige moyen (parchemin) */
+    .manga-btn { background-color: #a89a84; }  /* Brun chaud (vieille reliure manga) */
+    .series-btn { background-color: #b59b7a; }  /* Gris-beige (poussinets vintage) */
+    .library-btn { background-color: #8b7a5e; color: #f9f6ee; }  /* Brun foncé (cuir vintage) */
+    
     .vintage-stats {
       padding: 1.5rem;
       background-color: #e8e0d0;
@@ -329,6 +330,23 @@
     .stat-label {
       font-size: 0.9rem;
       color: #7a6a51;
+    }
+
+    /* Pèle mèle ajout avec extension mason*/
+    .masonry-grid {
+      width: 100%;
+      margin: auto;
+    }
+
+    .masonry-item {
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .masonry-item img {
+      display: block;
+      max-width: 100%;
+      height: auto;
     }
 
     /* Icônes Font Awesome */
@@ -553,6 +571,18 @@
         min-width: 100%;
       }
     }
+
+    @media (max-width: 900px) {
+      .pele-mele-grid {
+        column-count: 3;
+      }
+    }
+    @media (max-width: 600px) {
+      .pele-mele-grid {
+        column-count: 2;
+      }
+    }
+
 
 /* LIBRARY.html */
 
