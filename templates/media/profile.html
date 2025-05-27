@@ -60,13 +60,13 @@
 <div id="bibli-container" class="masonry-grid">
   {% for item in items %}
     {% if item.image %}
-      <div class="masonry-item" 
-           data-category="{{ item.model_name }}"
-           data-genres="{{ item.genres.all|join:',' }}">
+      <div class="masonry-item" >
         <a href="{% url 'item_detail' model_name=item.model_name item_id=item.id %}">
           <img src="{{ item.image.url }}" 
                alt="{{ item.title }}"
-               style="height: {{ item.display_size }}px;">
+               style="height: {{ item.display_size }}px;"
+               data-category="{{ item.model_name }}"
+              data-genres="{{ item.genres.all|join:',' }}">
         </a>
       </div>
     {% endif %}
@@ -118,21 +118,6 @@
       </div>
     </div>
   </div>
-  
-  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const grid = document.querySelector('.masonry-grid');
-      new Masonry(grid, {
-        itemSelector: '.masonry-item',
-        //columnWidth: 100,  // adapt to your base size
-        gutter: 10,
-        fitWidth: true,
-        percentPosition: true,
-      });
-    });
-  </script>
 
   <script>
   function filterItems() {
