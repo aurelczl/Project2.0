@@ -20,9 +20,9 @@ class Manga(models.Model):
     title = models.CharField(max_length=200)
     genres = models.ManyToManyField(Genre, blank=True)
     statuts = {
-        "Fini": "Read",
-        "Arrété": "stoped",
-        "En attente": "later",
+        "Fini": "Fini",
+        "Arrêté": "Arrêté",
+        "En attente": "En attente",
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
@@ -45,7 +45,13 @@ class Book(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=100, blank=True, null=True)
-    read = models.BooleanField(default=False)
+    #read = models.BooleanField(default=False)
+    statuts = {
+        "Fini": "Fini",
+        "Arrêté": "Arrêté",
+        "En attente": "En attente",
+    }
+    statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     genres = models.ManyToManyField(Genre, blank=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
