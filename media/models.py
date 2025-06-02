@@ -19,6 +19,12 @@ class Manga(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     genres = models.ManyToManyField(Genre, blank=True)
+    statuts = {
+        "Fini": "Read",
+        "Arrété": "stoped",
+        "En attente": "later",
+    }
+    statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)
