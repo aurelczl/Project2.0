@@ -10,7 +10,7 @@ class MangaForm(forms.ModelForm):
 
     class Meta:
         model = Manga
-        fields = ['title', 'statut', 'scan', 'finished_year',
+        fields = ['title', 'statut', 'scan', 'reading_website', 'finished_year',
                   'finished_month','finished_day',
                   'global_rate', 'image']
 

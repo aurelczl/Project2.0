@@ -27,6 +27,7 @@ class Manga(models.Model):
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     scan = models.CharField(max_length=2000, blank=True, null=True)
+    reading_website = models.URLField(blank=True, null=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)
