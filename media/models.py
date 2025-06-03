@@ -22,9 +22,11 @@ class Manga(models.Model):
     statuts = {
         "Fini": "Fini",
         "Arrêté": "Arrêté",
+        "En cours": "En cours",
         "En attente": "En attente",
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
+    stop_area = models.CharField(max_length=100, blank=True, null=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)
@@ -51,6 +53,12 @@ class Book(models.Model):
         "Arrêté": "Arrêté",
         "En attente": "En attente",
     }
+    statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
+    #statuts = {
+    #    "Fini": "Fini",
+    #    "Arrêté": "Arrêté",
+    #    "En attente": "En attente",
+    #}
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     genres = models.ManyToManyField(Genre, blank=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
