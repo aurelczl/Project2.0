@@ -10,7 +10,7 @@ class MangaForm(forms.ModelForm):
 
     class Meta:
         model = Manga
-        fields = ['title', 'statut', 'stop_area', 'finished_year',
+        fields = ['title', 'statut', 'scan', 'finished_year',
                   'finished_month','finished_day',
                   'global_rate', 'image']
 
@@ -133,7 +133,9 @@ class SeriesForm(forms.ModelForm):
 
     class Meta:
         model = Series
-        fields = ['title', 'seasons', 'episodes', 'completed','finished_year','finished_month','finished_day', 'stop_area', 'global_rate', 'image']
+        fields = ['title', 'seasons', 'episodes',# 'completed',
+        'finished_year','finished_month','finished_day',
+         'statut', 'saison', 'episode', 'global_rate', 'image']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -167,7 +169,9 @@ class MovieForm(forms.ModelForm):
 
     class Meta:
         model = Movie
-        fields = ['title', 'director', 'watched', 'global_rate','finished_year','finished_month','finished_day', 'image', 'raw_genres']
+        fields = ['title', 'director','statut', # 'watched',
+         'global_rate','finished_year','finished_month','finished_day',
+          'image', 'raw_genres']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

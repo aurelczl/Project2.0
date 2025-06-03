@@ -26,7 +26,7 @@ class Manga(models.Model):
         "En attente": "En attente",
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
-    stop_area = models.CharField(max_length=100, blank=True, null=True)
+    scan = models.CharField(max_length=2000, blank=True, null=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)
@@ -51,6 +51,7 @@ class Book(models.Model):
     statuts = {
         "Fini": "Fini",
         "Arrêté": "Arrêté",
+        "En cours": "En cours",
         "En attente": "En attente",
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
@@ -59,7 +60,7 @@ class Book(models.Model):
     #    "Arrêté": "Arrêté",
     #    "En attente": "En attente",
     #}
-    statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
+    #statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     genres = models.ManyToManyField(Genre, blank=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
@@ -83,12 +84,19 @@ class Series(models.Model):
     title = models.CharField(max_length=200)
     seasons = models.PositiveIntegerField()
     episodes = models.PositiveIntegerField(blank=True, null=True)
-    completed = models.BooleanField(default=False)
+    #completed = models.BooleanField(default=False)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)
-
-    stop_area = models.CharField(max_length=100, blank=True, null=True)
+    statuts = {
+        "Fini": "Fini",
+        "Arrêté": "Arrêté",
+        "En cours": "En cours",
+        "En attente": "En attente",
+    }
+    statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
+    saison = models.CharField(max_length=25, blank=True, null=True)
+    episode = models.CharField(max_length=100, blank=True, null=True)
     global_rate = models.IntegerField(validators=[MinValueValidator(0),
                                                   MaxValueValidator(100)],
                                       null=True,blank=True,default=0,
@@ -108,7 +116,13 @@ class Movie(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     director = models.CharField(max_length=100, blank=True, null=True)
-    watched = models.BooleanField(default=False)
+    #watched = models.BooleanField(default=False)
+    statuts = {
+        "Fini": "Fini",
+        "Arrêté": "Arrêté",
+        "En attente": "En attente",
+    }
+    statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)

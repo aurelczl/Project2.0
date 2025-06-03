@@ -183,7 +183,7 @@ def profile(request):
             rate = 100
         rate = int(rate)
         # Clamp entre 50 et 150 px
-        item.display_size = max(50, min(rate, 180))
+        item.display_size = max(50, min(rate, 250))
         
     return render(request, 'media/profile.html', {
         'books': books,
