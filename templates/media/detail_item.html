@@ -52,6 +52,17 @@
       </div>
     </div>
 
+    {% if instance.reading_website %}
+      <div class="detail-row">
+        <span class="detail-label">Continuer la lecture :</span>
+        <span class="detail-value">
+          <a href="{{ instance.reading_website }}" target="_blank" class="button website-btn">
+            Ici 📖
+          </a>
+        </span>
+      </div>
+    {% endif %}
+
     <!-- Boutons d'action -->
     <div class="item-actions">
       <a href="{% url 'edit_item' model_name=model_name item_id=instance.id %}" class="button edit-btn">✏️ Modifier</a>
