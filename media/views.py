@@ -25,16 +25,6 @@ def load_data(request):
         
 # dans un fichier views.py temporaire
 
-from django.contrib.auth import get_user_model
-from django.http import HttpResponse
-
-def create_superuser(request):
-    User = get_user_model()
-    if not User.objects.filter(username='aurel').exists():
-        User.objects.create_superuser('aurel', 'aurelie.chazy@gmail.com', 'Superuser2012!!')
-        return HttpResponse("Superuser créé avec succès !")
-    return HttpResponse("Superuser existe déjà.")
-
 # Create your views here.
 
 @require_GET
