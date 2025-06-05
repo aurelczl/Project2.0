@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from .models import Book, Series, Movie, Manga, Genre
 from .forms import BookForm, SeriesForm, MovieForm, MangaForm
 from django.http import Http404, JsonResponse
-
+import requests
+from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -23,6 +24,24 @@ def load_data(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
         
 # Create your views here.
+
+@require_GET
+def fetch_book_info(request):
+    title = request.GET.get('title')
+    if not title:
+        return JsonResponse({}, status=400)
+
+    r = requests.get("https://www.googleapis.com/books/v1/volumes", params={"q": title})
+    data = r.json()
+
+    if 'items' not in data:
+        return JsonResponse({})
+
+    volume = data['items'][0]['volumeInfo']
+    return JsonResponse({
+        'author': ', '.join(volume.get('authors', [])),
+        'edition': volume.get('publisher', ''),
+    })
 
 def home(request):
     return render(request, 'media/home.html')
@@ -184,7 +203,8 @@ def profile(request):
         rate = int(rate)
         # Clamp entre 50 et 150 px
         item.display_size = max(50, min(rate, 250))
-        
+        #print(item.statut)
+    
     return render(request, 'media/profile.html', {
         'books': books,
         'series': series,

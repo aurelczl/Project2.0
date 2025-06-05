@@ -17,11 +17,22 @@
         <div class="vintage-filter-group">
             <h3 class="vintage-filter-title"><i class="fas fa-folder"></i> Catégories</h3>
             <div id="category-filters" class="vintage-btn-group">
-		<button class="vintage-filter-btn filter-btn active" data-category="all" onclick="filterItems()">Tous</button>
+		            <button class="vintage-filter-btn filter-btn active" data-category="all" onclick="filterItems()">Tous</button>
                 <button class="vintage-filter-btn filter-btn" data-category="book" onclick="filterItems()">Livres</button>
                 <button class="vintage-filter-btn filter-btn" data-category="movie" onclick="filterItems()">Films</button>
                 <button class="vintage-filter-btn filter-btn" data-category="series" onclick="filterItems()">Séries</button>
-		<button class="vintage-filter-btn filter-btn" data-category="manga" onclick="filterItems()">Mangas</button>
+		            <button class="vintage-filter-btn filter-btn" data-category="manga" onclick="filterItems()">Mangas</button>
+            </div>
+        </div>
+
+        <div class="vintage-filter-group">
+            <h3 class="vintage-filter-title"><i class="fas fa-battery-three-quarters"></i> Statuts</h3>
+            <div id="statut-filters" class="vintage-btn-group">
+		            <button class="vintage-filter-btn statut-btn active" data-statut="all" onclick="filterItems()">Tous</button>
+                <button class="vintage-filter-btn statut-btn" data-statut="Fini" onclick="filterItems()">Fini</button>
+                <button class="vintage-filter-btn statut-btn" data-statut="En cours" onclick="filterItems()">En cours</button>
+                <button class="vintage-filter-btn statut-btn" data-statut="En attente" onclick="filterItems()">En attente</button>
+                <button class="vintage-filter-btn statut-btn" data-statut="Arrêté" onclick="filterItems()">Arrêté</button>
             </div>
         </div>
 
@@ -46,6 +57,7 @@
              alt="{{ item.title }}"
              data-category="{{ item.model_name }}"
              data-genres="{{ item.genres.all|join:',' }}"
+             data-statut="{{ item.statut|default_if_none:'' }}"
              style="max-height: {{ item.display_size }}px;">
       </a>
     {% endif %}
@@ -66,7 +78,8 @@
                alt="{{ item.title }}"
                style="height: {{ item.display_size }}px;"
                data-category="{{ item.model_name }}"
-              data-genres="{{ item.genres.all|join:',' }}">
+              data-genres="{{ item.genres.all|join:',' }}"
+              data-statut="{{ item.statut|default_if_none:'' }}">
         </a>
       </div>
     {% endif %}
@@ -80,7 +93,7 @@
         <a href="{% url 'add_book' %}" class="vintage-button book-btn">
           <i class="fas fa-book"></i> Ajouter un livre
         </a>
-	<a href="{% url 'add_manga' %}" class="vintage-button Manga-btn">
+	      <a href="{% url 'add_manga' %}" class="vintage-button Manga-btn">
           <i class="fas fa-book"></i> Ajouter un Manga
         </a>
         <a href="{% url 'add_movie' %}" class="vintage-button movie-btn">
@@ -129,8 +142,18 @@
       }
     });
 
+    // Récupérer statut sélectionné
+    let selectedStatut = 'all';
+    document.querySelectorAll('#statut-filters .statut-btn').forEach(btn => {
+      if (btn.classList.contains('active')) {
+        selectedStatut = btn.dataset.statut;
+      }
+    });
+
     // Récupérer genres sélectionnés
     let selectedGenres = Array.from(document.querySelectorAll('.genre-checkbox:checked')).map(cb => cb.value);
+
+    console.log("Filtrage en cours - catégorie :", selectedCategory, "statut :", selectedStatut, "genres :", selectedGenres);
 
     let items = document.querySelectorAll('#bibli-container img');
     let foundAny = false;
@@ -138,6 +161,7 @@
     items.forEach(img => {
       let itemCategory = img.dataset.category;  // on mettra ça dans template
       let itemGenres = img.dataset.genres ? img.dataset.genres.split(',') : [];
+      let itemStatut = img.dataset.statut || '';
 
       // Vérifier catégorie
       let categoryMatch = (selectedCategory === 'all' || itemCategory === selectedCategory);
@@ -145,7 +169,12 @@
       // Vérifier genre (si aucun sélectionné, on ignore)
       let genreMatch = selectedGenres.length === 0 || selectedGenres.every(g => itemGenres.includes(g));
 
-      if (categoryMatch && genreMatch) {
+      // Vérifier statut
+      let statutMatch = (selectedStatut === 'all') || (itemStatut && itemStatut === selectedStatut);
+
+      
+
+      if (categoryMatch && genreMatch && statutMatch) {
         img.style.display = '';
         foundAny = true;
       } else {
@@ -179,9 +208,19 @@
     });
   });
 
+  // Activer statut
+  document.querySelectorAll('#statut-filters .statut-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#statut-filters .statut-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterItems();
+    });
+  });
+
   // Au chargement, activer "Tous"
   window.onload = () => {
     document.querySelector('#category-filters .filter-btn[data-category="all"]').classList.add('active');
+    document.querySelector('#statut-filters .statut-btn[data-statut="all"]').classList.add('active');
     filterItems();
   };
 </script>

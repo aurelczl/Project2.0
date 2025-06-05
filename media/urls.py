@@ -25,6 +25,8 @@ urlpatterns = [
     path('library/', views.library_view, name='library'),
     path('admin/load_data/', views.load_data, name='load_data'),
 
+    path('api/fetch-book-info/', views.fetch_book_info, name='fetch_book_info'),
+
 
 ]
 
