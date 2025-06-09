@@ -46,7 +46,6 @@ def fetch_book_info(request):
         'author': ', '.join(volume.get('authors', [])),
         'edition': volume.get('publisher', ''),
         'pageCount': volume.get('pageCount'),
-        'image': volume.get('imageLinks', {}).get('thumbnail')
     })
 
 @require_GET
