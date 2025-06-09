@@ -33,7 +33,7 @@ def fetch_book_info(request):
     if not title:
         return JsonResponse({}, status=400)
 
-    r = requests.get("https://www.googleapis.com/books/v1/volumes", params={"q": title})
+    r = requests.get("https://www.googleapis.com/books/v1/volumes", params={"q": title , "langRestrict": "fr,en"})
     data = r.json()
 
     if 'items' not in data:
