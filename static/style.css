@@ -636,3 +636,24 @@
         gap: 2rem;
         margin: 1rem 0;
     }
+
+/* Add item liste déroulante proposition API */
+
+.suggestions-box {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 999;
+  max-height: 150px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.suggestions-box div {
+  padding: 5px;
+  cursor: pointer;
+}
+
+.suggestions-box div:hover {
+  background-color: #eee;
+}

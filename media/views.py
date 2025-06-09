@@ -27,6 +27,8 @@ def load_data(request):
 
 # Create your views here.
 
+### Googla books API ###
+
 @require_GET
 def fetch_book_info(request):
     title = request.GET.get('title')
@@ -43,7 +45,31 @@ def fetch_book_info(request):
     return JsonResponse({
         'author': ', '.join(volume.get('authors', [])),
         'edition': volume.get('publisher', ''),
+        'pageCount': volume.get('pageCount'),
+        'image': volume.get('imageLinks', {}).get('thumbnail')
     })
+
+@require_GET
+def book_suggestions(request):
+    query = request.GET.get('q', '')
+    if len(query) < 3:
+        return JsonResponse([], safe=False)
+
+    r = requests.get(
+        "https://www.googleapis.com/books/v1/volumes",
+        params={"q": query, "maxResults": 5, "langRestrict": "fr"}
+    )
+    data = r.json()
+
+    suggestions = []
+    for item in data.get("items", []):
+        title = item["volumeInfo"].get("title")
+        if title:
+            suggestions.append(title)
+
+    return JsonResponse(suggestions, safe=False)
+
+# BASE 
 
 def home(request):
     return render(request, 'media/home.html')

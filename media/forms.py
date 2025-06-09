@@ -73,7 +73,7 @@ class BookForm(forms.ModelForm):
         model = Book
         fields = ['title', 'author', 'statut',
         'finished_year','finished_month','finished_day',
-         'edition', 'global_rate', 'image']
+         'edition', 'pageCount', 'global_rate', 'image']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

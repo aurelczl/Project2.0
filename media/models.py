@@ -56,17 +56,14 @@ class Book(models.Model):
         "En attente": "En attente",
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
-    #statuts = {
-    #    "Fini": "Fini",
-    #    "Arrêté": "Arrêté",
-    #    "En attente": "En attente",
-    #}
-    #statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     genres = models.ManyToManyField(Genre, blank=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)
     edition = models.CharField(max_length=100, blank=True)
+    pageCount =  models.IntegerField(validators=[MinValueValidator(0),
+                                                  MaxValueValidator(10000)],
+                                      null=True,blank=True)
     global_rate = models.IntegerField(validators=[MinValueValidator(0),
                                                   MaxValueValidator(100)],
                                       null=True,blank=True,default=0,
