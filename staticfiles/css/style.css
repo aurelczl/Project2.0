@@ -334,24 +334,28 @@
 
     /* Pèle mèle ajout avec extension mason*/
     .masonry-grid {
-      width: 100%;
-      margin: auto;
-      column-gap: 1em;
+      margin: 0 auto;
     }
 
     .masonry-item {
-      margin-bottom: 4px; /* même que gutter */
+      margin-bottom: 6px;
+      background: transparent;
       break-inside: avoid;
-      background: white;
     }
 
     .masonry-item img {
-      display: block;
-      width: auto;
+      width: 100%;
       height: auto;
-      max-width: 100%;
-      border-radius: 0;
+      display: block;
       transition: transform 0.3s ease;
+      border-radius: 0;
+    }
+
+
+    @media (max-width: 768px) {
+      .masonry-item {
+        width: 100%;
+      }
     }
 
     /* Icônes Font Awesome */
