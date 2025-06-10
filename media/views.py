@@ -10,6 +10,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.db.models import Q
 import json
+from bs4 import BeautifulSoup
 
 # Gestion des données local pour render :
 
@@ -83,7 +84,6 @@ def book_suggestions(request):
 
     return JsonResponse(results[:5], safe=False)
 
-@require_GET
 def fetch_openlib_suggestions(request):
     query = request.GET.get('q', '').strip()
     if len(query) < 3:
@@ -128,7 +128,6 @@ def fetch_openlib_suggestions(request):
     except Exception as e:
         return JsonResponse([], safe=False)
 
-@require_GET
 def fetch_babelio_suggestions(query):
     try:
         url = "https://www.babelio.com/recherche.php"
@@ -155,7 +154,6 @@ def fetch_babelio_suggestions(query):
         print(f"Erreur Babelio: {e}")
         return []
 
-@require_GET
 def fetch_booknode_suggestions(query):
     try:
         url = "https://www.booknode.com/recherche"
