@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>{{ title }}</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% for field in form.visible_fields %}
+      {% if field.name not in 'raw_genres finished_year finished_month finished_day' %}
+        <div>
+          {{ field.label_tag }}<br>
+          {{ field }}
+          <div id="title-suggestions" class="suggestions-box"></div>
+          {% if field.help_text %}
+            <small>{{ field.help_text }}</small>
+          {% endif %}
+        </div>
+        <br>
+      {% endif %}
+
+    {% endfor %}
+    
+    <div>
+       <label>Année de fin</label><br>
+       {{ form.finished_year }}
+    </div>
+    <div>
+       <label>Mois de fin</label><br>
+       {{ form.finished_month }}
+    </div>
+    <div>
+       <label>Jour de fin</label><br>
+       {{ form.finished_day }}
+    </div>
+
+    <!-- Bouton pour remplir automatiquement la date -->
+    <div style="margin-top: 10px;">
+       <button type="button" id="set-today">📅 Fini aujourd’hui</button>
+    </div>
+
+    <label for="genre-select">Genres</label>
+    <select id="genre-select" multiple="multiple" style="width:100%">
+      {% for genre in all_genres %}
+        <option value="{{ genre.name }}">{{ genre.name }}</option>
+      {% endfor %}
+    </select>
+    {{ form.raw_genres }}
+
+    <br><br>
+    <button type="submit">Ajouter</button>
+  </form>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Select2 CSS + JS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <script>
+     document.getElementById("set-today").addEventListener("click", function() {
+       const today = new Date();
+       document.getElementById("id_finished_year").value = today.getFullYear();
+       document.getElementById("id_finished_month").value = today.getMonth() + 1;
+       document.getElementById("id_finished_day").value = today.getDate();
+     });
+  </script>
+
+  <script>
+    $(document).ready(function () {
+      const initialGenres = "{{ form.initial.raw_genres|default:'' }}".split(',');
+
+      $('#genre-select').select2({
+        tags: true,
+        tokenSeparators: [','],
+        placeholder: "Choisissez ou ajoutez des genres",
+        allowClear: true,
+        width: '100%',
+        data: initialGenres.map(g => ({ id: g, text: g }))
+      });
+
+      $('#genre-select').val(initialGenres).trigger('change');
+
+      $('form').on('submit', function () {
+        const selected = $('#genre-select').val();
+        $('input[name="raw_genres"]').val(selected.join(','));
+      });
+    });
+  </script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const titleInput = document.getElementById('id_title');
+  const suggestionsBox = document.getElementById('title-suggestions');
+
+  titleInput.addEventListener('input', function () {
+    const query = this.value;
+    if (query.length < 3) {
+      suggestionsBox.innerHTML = '';
+      return;
+    }
+
+    fetch(`/api/book-suggestions/?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(titles => {
+        suggestionsBox.innerHTML = '';
+        titles.forEach(title => {
+          const div = document.createElement('div');
+          div.textContent = title;
+          
+          div.addEventListener('click', () => {
+            // Remplir le champ titre avec le texte cliqué
+            titleInput.value = title;
+            suggestionsBox.innerHTML = '';
+
+            // 🔽 ICI ton bloc d'auto-remplissage
+            fetch(`/api/fetch-book-info/?title=${encodeURIComponent(title)}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.author) document.getElementById('id_author').value = data.author;
+                if (data.edition) document.getElementById('id_edition').value = data.edition;
+                if (data.pageCount) document.getElementById('id_pageCount').value = data.pageCount;
+
+              });
+          });
+
+          suggestionsBox.appendChild(div);
+        });
+      });
+  });
+
+  document.addEventListener('click', e => {
+    if (!suggestionsBox.contains(e.target) && e.target !== titleInput) {
+      suggestionsBox.innerHTML = '';
+    }
+  });
+});
+</script>
+
+{% endblock %}

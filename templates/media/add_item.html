@@ -12,7 +12,8 @@
         <div>
           {{ field.label_tag }}<br>
           {{ field }}
-          <div id="title-suggestions" class="suggestions-box"></div>
+          
+          <div id="title-suggestions-openlib" class="suggestions-box"></div>
           {% if field.help_text %}
             <small>{{ field.help_text }}</small>
           {% endif %}
@@ -92,53 +93,78 @@
     });
   </script>
 
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const titleInput = document.getElementById('id_title');
-  const suggestionsBox = document.getElementById('title-suggestions');
+<script>
+ document.addEventListener('DOMContentLoaded', () => {
+    const titleInput = document.getElementById('id_title');
+    const suggestionsBox = document.getElementById('title-suggestions-openlib'); // Corrigé pour matcher l'HTML
 
-  titleInput.addEventListener('input', function () {
-    const query = this.value;
-    if (query.length < 3) {
-      suggestionsBox.innerHTML = '';
-      return;
-    }
-
-    fetch(`/api/book-suggestions/?q=${encodeURIComponent(query)}`)
-      .then(res => res.json())
-      .then(titles => {
-        suggestionsBox.innerHTML = '';
-        titles.forEach(title => {
-          const div = document.createElement('div');
-          div.textContent = title;
-          
-          div.addEventListener('click', () => {
-            // Remplir le champ titre avec le texte cliqué
-            titleInput.value = title;
+    titleInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        if (query.length < 3) {
             suggestionsBox.innerHTML = '';
+            return;
+        }
 
-            // 🔽 ICI ton bloc d'auto-remplissage
-            fetch(`/api/fetch-book-info/?title=${encodeURIComponent(title)}`)
-              .then(res => res.json())
-              .then(data => {
-                if (data.author) document.getElementById('id_author').value = data.author;
-                if (data.edition) document.getElementById('id_edition').value = data.edition;
-                if (data.pageCount) document.getElementById('id_pageCount').value = data.pageCount;
+        fetch(`/api/book-suggestions-openlib/?q=${encodeURIComponent(query)}`, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
+        .then(titles => {
+            suggestionsBox.innerHTML = '';
+            if (titles.length === 0) return;
 
-              });
-          });
+            titles.forEach(title => {
+                const div = document.createElement('div');
+                div.textContent = title;
+                div.classList.add('suggestion-item');
 
-          suggestionsBox.appendChild(div);
+                div.addEventListener('click', () => {
+                    titleInput.value = title;
+                    suggestionsBox.innerHTML = '';
+
+                    fetch(`/api/fetch-book-info-openlib/?title=${encodeURIComponent(title)}`, {
+                        headers: {'X-Requested-With': 'XMLHttpRequest'}
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error('Network response was not ok');
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.author) document.getElementById('id_author').value = data.author || '';
+                        if (data.edition) document.getElementById('id_edition').value = data.edition || '';
+                        if (data.pageCount) document.getElementById('id_pageCount').value = data.pageCount || '';
+                        if (data.cover_id) {
+                            const imageUrl = `https://covers.openlibrary.org/b/id/${data.cover_id}-L.jpg`;
+                            const previewImg = document.getElementById('preview-image');
+                            if (previewImg) previewImg.src = imageUrl;
+                            const imageUrlField = document.getElementById('id_image_url_field');
+                            if (imageUrlField) imageUrlField.value = imageUrl;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching book details:', error);
+                    });
+                });
+
+                suggestionsBox.appendChild(div);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching suggestions:', error);
+            suggestionsBox.innerHTML = '';
         });
-      });
-  });
+    });
 
-  document.addEventListener('click', e => {
-    if (!suggestionsBox.contains(e.target) && e.target !== titleInput) {
-      suggestionsBox.innerHTML = '';
-    }
-  });
+    document.addEventListener('click', e => {
+        if (!suggestionsBox.contains(e.target) && e.target !== titleInput) {
+            suggestionsBox.innerHTML = '';
+        }
+    });
 });
 </script>
+
 
 {% endblock %}

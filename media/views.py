@@ -68,6 +68,55 @@ def book_suggestions(request):
 
     return JsonResponse(suggestions, safe=False)
 
+### VUES API BOOKS : Openlibrary.org ###
+
+@require_GET
+def fetch_book_info_openlib(request):
+    title = request.GET.get('title')
+    if not title:
+        return JsonResponse({}, status=400)
+
+    url = "https://openlibrary.org/search.json"
+    params = {"title": title}
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    if not data.get('docs'):
+        return JsonResponse({})
+
+    book = data['docs'][0]  # Premier résultat
+
+    return JsonResponse({
+        'author': ', '.join(book.get('author_name', [])),
+        'edition': book.get('publisher', [''])[0],
+        'pageCount': book.get('number_of_pages_median', ''),
+        'cover_id': book.get('cover_i', None),  # Pour image
+    })
+
+@require_GET
+def book_suggestions_openlib(request):
+    query = request.GET.get('q', '')
+    if len(query) < 3:
+        return JsonResponse([], safe=False)
+
+    r = requests.get(
+        "https://openlibrary.org/search.json",
+        params={"title": query, "limit": 5}
+    )
+    data = r.json()
+
+    suggestions = []
+    seen = set()
+    for doc in data.get("docs", []):
+        title = doc.get("title")
+        if title and title not in seen:
+            suggestions.append(title)
+            seen.add(title)
+        if len(suggestions) >= 5:
+            break
+
+    return JsonResponse(suggestions, safe=False)
+
 # BASE 
 
 def home(request):
