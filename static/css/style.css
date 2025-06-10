@@ -668,3 +668,30 @@
 #cover-image-container {
     margin: 10px 0;
 }
+
+.btn-group {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.btn-source {
+  padding: 5px 10px;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-source.active {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.source-selector {
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  border: 1px solid #eee;
+}

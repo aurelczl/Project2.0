@@ -23,101 +23,166 @@ def load_data(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
         
-# dans un fichier views.py temporaire
-
 # Create your views here.
 
-### Googla books API ###
 
-@require_GET
-def fetch_book_info(request):
-    title = request.GET.get('title')
-    if not title:
-        return JsonResponse({}, status=400)
-
-    r = requests.get("https://www.googleapis.com/books/v1/volumes", params={"q": title , "langRestrict": "fr,en"})
-    data = r.json()
-
-    if 'items' not in data:
-        return JsonResponse({})
-
-    volume = data['items'][0]['volumeInfo']
-    return JsonResponse({
-        'author': ', '.join(volume.get('authors', [])),
-        'edition': volume.get('publisher', ''),
-        'pageCount': volume.get('pageCount'),
-    })
-
-@require_GET
-def book_suggestions(request):
-    query = request.GET.get('q', '')
-    if len(query) < 3:
-        return JsonResponse([], safe=False)
-
-    r = requests.get(
-        "https://www.googleapis.com/books/v1/volumes",
-        params={"q": query, "maxResults": 5, "langRestrict": "fr"}
-    )
-    data = r.json()
-
-    suggestions = []
-    for item in data.get("items", []):
-        title = item["volumeInfo"].get("title")
-        if title:
-            suggestions.append(title)
-
-    return JsonResponse(suggestions, safe=False)
-
-### VUES API BOOKS : Openlibrary.org ###
+### VUES API BOOKS : Openlibrary.org / babelio /booknode ###
 
 @require_GET
 def fetch_book_info_openlib(request):
-    title = request.GET.get('title')
+    title = request.GET.get('title', '').strip()
     if not title:
         return JsonResponse({}, status=400)
 
-    url = "https://openlibrary.org/search.json"
-    params = {"title": title}
-    response = requests.get(url, params=params)
-    data = response.json()
+    try:
+        url = "https://openlibrary.org/search.json"
+        params = {
+            "title": title,
+            "limit": 1,
+            "fields": "author_name,publisher,number_of_pages_median,cover_i,language"
+        }
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
 
-    if not data.get('docs'):
-        return JsonResponse({})
+        if not data.get('docs'):
+            return JsonResponse({})
 
-    book = data['docs'][0]  # Premier résultat
+        book = data['docs'][0]
 
-    return JsonResponse({
-        'author': ', '.join(book.get('author_name', [])),
-        'edition': book.get('publisher', [''])[0],
-        'pageCount': book.get('number_of_pages_median', ''),
-        'cover_id': book.get('cover_i', None),  # Pour image
-    })
+        # Essayer différentes clés pour le nombre de pages
+        page_count = book.get('number_of_pages_median') or \
+                     book.get('number_of_pages') or \
+                     ''
+
+        return JsonResponse({
+            'author': ', '.join(book.get('author_name', [])) if book.get('author_name') else '',
+            'edition': ', '.join(book.get('publisher', [])) if book.get('publisher') else '',
+            'pageCount': page_count,
+            'cover_id': book.get('cover_i'),
+        })
+    except Exception as e:
+        return JsonResponse({}, status=500)
 
 @require_GET
-def book_suggestions_openlib(request):
-    query = request.GET.get('q', '')
+def book_suggestions(request):
+    query = request.GET.get('q', '').strip()
+    source = request.GET.get('source', 'openlibrary')
+    
     if len(query) < 3:
         return JsonResponse([], safe=False)
 
-    r = requests.get(
-        "https://openlibrary.org/search.json",
-        params={"title": query, "limit": 5}
-    )
-    data = r.json()
+    if source == 'openlibrary':
+        results = fetch_openlib_suggestions(query)
+    elif source == 'babelio':
+        results = fetch_babelio_suggestions(query)
+    elif source == 'booknode':
+        results = fetch_booknode_suggestions(query)
+    else:
+        results = []
 
-    suggestions = []
-    seen = set()
-    for doc in data.get("docs", []):
-        title = doc.get("title")
-        if title and title not in seen:
-            suggestions.append(title)
-            seen.add(title)
-        if len(suggestions) >= 5:
-            break
+    return JsonResponse(results[:5], safe=False)
 
-    return JsonResponse(suggestions, safe=False)
+@require_GET
+def fetch_openlib_suggestions(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 3:
+        return JsonResponse([], safe=False)
 
-# BASE 
+    try:
+        r = requests.get(
+            "https://openlibrary.org/search.json",
+            params={"title": query, "limit": 10, "fields": "title,author_name,language"}
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        suggestions = []
+        seen_titles = set()
+        
+        for doc in data.get("docs", []):
+            title = doc.get("title", "").strip()
+            languages = doc.get("language", [])
+            
+            # Filtrer par anglais/français si langue spécifiée
+            if languages and not any(lang in ['eng', 'fre', 'fr', 'en'] for lang in languages):
+                continue
+                
+            if title and title not in seen_titles:
+                # Ajouter l'auteur si disponible pour mieux identifier
+                authors = ", ".join(doc.get("author_name", [])[:2])
+                display_text = f"{title} {' - ' + authors if authors else ''}"
+                
+                suggestions.append({
+                    'title': title,
+                    'display': display_text,
+                    'authors': doc.get("author_name", [])
+                })
+                seen_titles.add(title)
+                
+            if len(suggestions) >= 5:
+                break
+
+        return JsonResponse(suggestions, safe=False)
+
+    except Exception as e:
+        return JsonResponse([], safe=False)
+
+@require_GET
+def fetch_babelio_suggestions(query):
+    try:
+        url = "https://www.babelio.com/recherche.php"
+        params = {"Recherche": query}
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        
+        response = requests.get(url, params=params, headers=headers)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        suggestions = []
+        for item in soup.select('.livre_con'):
+            title = item.select_one('.titre').get_text(strip=True) if item.select_one('.titre') else ''
+            author = item.select_one('.auteur').get_text(strip=True) if item.select_one('.auteur') else ''
+            
+            if title:
+                suggestions.append({
+                    'title': title,
+                    'author': author,
+                    'source': 'babelio'
+                })
+                
+        return suggestions
+    except Exception as e:
+        print(f"Erreur Babelio: {e}")
+        return []
+
+@require_GET
+def fetch_booknode_suggestions(query):
+    try:
+        url = "https://www.booknode.com/recherche"
+        params = {"q": query}
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        
+        response = requests.get(url, params=params, headers=headers)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        suggestions = []
+        for item in soup.select('.bookList-item'):
+            title = item.select_one('.bookTitle').get_text(strip=True) if item.select_one('.bookTitle') else ''
+            author = item.select_one('.authorName').get_text(strip=True) if item.select_one('.authorName') else ''
+            
+            if title:
+                suggestions.append({
+                    'title': title,
+                    'author': author,
+                    'source': 'booknode'
+                })
+                
+        return suggestions
+    except Exception as e:
+        print(f"Erreur BookNode: {e}")
+        return []
+        
+###### BASE ######
 
 def home(request):
     return render(request, 'media/home.html')
@@ -356,13 +421,15 @@ def add_book(request):
     else:
         form = BookForm()
     
+    item = 'book'
     # Envoie tous les genres pour peupler la liste Select2
     all_genres = Genre.objects.all()
 
     return render(request, 'media/add_item.html', {
         'form': form,
         'title': 'Ajouter un livre',
-        'all_genres': all_genres
+        'all_genres': all_genres,
+        'item' : item,
     })
 
 @login_required
