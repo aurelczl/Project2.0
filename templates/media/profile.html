@@ -72,19 +72,20 @@
 <div id="bibli-container" class="masonry-grid">
   {% for item in items %}
     {% if item.image %}
-      <div class="masonry-item" >
+      <div class="masonry-item" style="width: {{ item.display_size }}px;">
         <a href="{% url 'item_detail' model_name=item.model_name item_id=item.id %}">
-          <img src="{{ item.image.url }}" 
+          <img src="{{ item.image.url }}"
                alt="{{ item.title }}"
-               style="height: {{ item.display_size }}px;"
+               style="height: auto; width: 100%;"
                data-category="{{ item.model_name }}"
-              data-genres="{{ item.genres.all|join:',' }}"
-              data-statut="{{ item.statut|default_if_none:'' }}">
+               data-genres="{{ item.genres.all|join:',' }}"
+               data-statut="{{ item.statut|default_if_none:'' }}">
         </a>
       </div>
     {% endif %}
   {% endfor %}
 </div>
+
 
     <!-- Boutons d'action ! -->
     <div class="vintage-actions">

@@ -59,19 +59,20 @@
     document.addEventListener("DOMContentLoaded", function () {
         const grid = document.querySelector('.masonry-grid');
         if (grid) {
-        // S'assurer que les images sont chargées avant d’initier Masonry
         imagesLoaded(grid, function () {
             new Masonry(grid, {
             itemSelector: '.masonry-item',
-            gutter: 4,  // ≈ 2mm si tu as un écran 96dpi (2mm ≈ 7.5px mais 4px est visuellement proche)
+            columnWidth: '.masonry-item', // ← meilleure précision
+            gutter: 4,
             fitWidth: true,
             percentPosition: true,
-            horizontalOrder: true  // rempli de gauche à droite
+            horizontalOrder: true
             });
         });
         }
     });
     </script>
+
 
     {% endblock %}
 </body>
