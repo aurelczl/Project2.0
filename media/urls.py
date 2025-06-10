@@ -25,11 +25,12 @@ urlpatterns = [
     path('library/', views.library_view, name='library'),
     path('admin/load_data/', views.load_data, name='load_data'),
 
-    # Pour openlibrary
-    path('api/fetch-book-info-openlib/', views.fetch_book_info_openlib, name='fetch_book_info_openlib'),
+    # Pour openlibrary : Ancienne version
+    #path('api/fetch-book-info-openlib/', views.fetch_book_info_openlib, name='fetch_book_info_openlib'),
     #path('api/book-suggestions-openlib/', views.book_suggestions_openlib, name='book_suggestions_openlib'),
     # Pour choix openlib/babelio/booknode :
     path('api/book-suggestions/', views.book_suggestions, name='book_suggestions'),
+    path('api/fetch-book-info/', views.fetch_book_info, name='fetch_book_info'),
 
 
 

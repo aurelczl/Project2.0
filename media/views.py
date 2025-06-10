@@ -29,6 +29,7 @@ def load_data(request):
 
 ### VUES API BOOKS : Openlibrary.org / babelio /booknode ###
 
+# Ancienne version récupération d'info openlib
 @require_GET
 def fetch_book_info_openlib(request):
     title = request.GET.get('title', '').strip()
@@ -64,6 +65,94 @@ def fetch_book_info_openlib(request):
         })
     except Exception as e:
         return JsonResponse({}, status=500)
+
+#Nouvelle version info pour multisource :
+@require_GET
+def fetch_book_info(request):
+    title = request.GET.get('title', '').strip()
+    source = request.GET.get('source', 'openlibrary')
+    
+    if not title:
+        return JsonResponse({}, status=400)
+
+    try:
+        if source == 'openlibrary':
+            data = fetch_book_info_openlib(title)
+        elif source == 'babelio':
+            data = fetch_book_info_babelio(title)
+        elif source == 'booknode':
+            data = fetch_book_info_booknode(title)
+        else:
+            data = {}
+
+        return JsonResponse(data)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def fetch_book_info_openlib(title):
+    url = "https://openlibrary.org/search.json"
+    params = {
+        "title": title,
+        "limit": 1,
+        "fields": "author_name,publisher,number_of_pages_median,cover_i,language"
+    }
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    data = response.json()
+
+    if not data.get('docs'):
+        return {}
+
+    book = data['docs'][0]
+
+    return {
+        'author': ', '.join(book.get('author_name', [])) if book.get('author_name') else '',
+        'edition': ', '.join(book.get('publisher', [])) if book.get('publisher') else '',
+        'pageCount': book.get('number_of_pages_median') or book.get('number_of_pages') or '',
+        'cover_id': book.get('cover_i'),
+        'source': 'openlibrary'
+    }
+
+def fetch_book_info_babelio(title):
+    url = "https://www.babelio.com/recherche.php"
+    params = {"Recherche": title}
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    response = requests.get(url, params=params, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    first_result = soup.select_one('.livre_con')
+    if not first_result:
+        return {}
+
+    return {
+        'author': first_result.select_one('.auteur').get_text(strip=True) if first_result.select_one('.auteur') else '',
+        'edition': '',  # Babelio ne montre pas directement l'édition
+        'pageCount': '',  # Non disponible directement dans les résultats
+        'cover_url': first_result.select_one('img')['src'] if first_result.select_one('img') else '',
+        'source': 'babelio'
+    }
+
+def fetch_book_info_booknode(title):
+    url = "https://www.booknode.com/recherche"
+    params = {"q": title}
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    response = requests.get(url, params=params, headers=headers)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    first_result = soup.select_one('.bookList-item')
+    if not first_result:
+        return {}
+
+    return {
+        'author': first_result.select_one('.authorName').get_text(strip=True) if first_result.select_one('.authorName') else '',
+        'edition': first_result.select_one('.editor').get_text(strip=True) if first_result.select_one('.editor') else '',
+        'pageCount': '',  # BookNode ne montre pas ça dans les résultats
+        'cover_url': first_result.select_one('img')['src'] if first_result.select_one('img') else '',
+        'source': 'booknode'
+    }
 
 @require_GET
 def book_suggestions(request):

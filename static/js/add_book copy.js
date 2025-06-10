@@ -1,9 +1,9 @@
-// static/js/add_book.js
+// static/book_form.js
 
 export function initBookForm() {
     const titleInput = document.getElementById('id_title');
-    if (!titleInput) return;
-
+    if (!titleInput) return; // Si pas sur un formulaire de livre
+    
     const suggestionsBox = document.getElementById('title-suggestions-openlib');
     let currentSource = 'openlibrary';
 
@@ -61,55 +61,25 @@ function displaySuggestions(items, titleInput, suggestionsBox) {
         `;
         
         div.classList.add('suggestion-item');
-        div.addEventListener('click', async () => {
+        div.addEventListener('click', () => {
             titleInput.value = item.title;
             suggestionsBox.innerHTML = '';
-            
-            const bookDetails = await fetchCompleteBookDetails(item.title, item.source);
-            updateBookDetails({...item, ...bookDetails});
+            fillBookDetails(item);
         });
         
         suggestionsBox.appendChild(div);
     });
 }
 
-async function fetchCompleteBookDetails(title, source) {
-    try {
-        const response = await fetch(`/api/fetch-book-info/?title=${encodeURIComponent(title)}&source=${source}`);
-        if (!response.ok) throw new Error('Erreur réseau');
-        return await response.json();
-    } catch (error) {
-        console.error('Erreur:', error);
-        return {};
-    }
-}
-
-function updateBookDetails(item) {
-    // Remplir l'auteur
+function fillBookDetails(item) {
     if (item.author) {
         const authorField = document.getElementById('id_author');
         if (authorField) authorField.value = item.author;
     }
     
-    // Remplir l'édition
-    if (item.edition) {
-        const editionField = document.getElementById('id_edition');
-        if (editionField) editionField.value = item.edition;
-    }
-    
-    // Remplir le nombre de pages
-    if (item.pageCount) {
-        const pageCountField = document.getElementById('id_pageCount');
-        if (pageCountField) pageCountField.value = item.pageCount;
-    }
-    
-    // Gestion des images
     if (item.source === 'openlibrary' && item.cover_id) {
-        updateBookCover(`https://covers.openlibrary.org/b/id/${item.cover_id}-M.jpg`);
-    } 
-    else if ((item.source === 'babelio' || item.source === 'booknode') && item.cover_url) {
-        const fullUrl = item.cover_url.startsWith('http') ? item.cover_url : `https://www.babelio.com${item.cover_url}`;
-        updateBookCover(fullUrl);
+        const imageUrl = `https://covers.openlibrary.org/b/id/${item.cover_id}-M.jpg`;
+        updateBookCover(imageUrl);
     }
 }
 
@@ -118,24 +88,7 @@ function updateBookCover(imageUrl) {
     if (!imageContainer) {
         imageContainer = document.createElement('div');
         imageContainer.id = 'cover-image-container';
-        imageContainer.style.marginTop = '10px';
         document.getElementById('id_title').parentNode.insertAdjacentElement('afterend', imageContainer);
     }
-    
-    imageContainer.innerHTML = `
-        <img src="${imageUrl}" 
-             style="max-height:200px; border:1px solid #ddd; border-radius:4px;"
-             onerror="this.style.display='none'">
-        <button type="button" class="remove-cover" 
-                style="margin-left:10px; color:red; background:none; border:none; cursor:pointer;">
-            × Supprimer
-        </button>
-    `;
-    
-    // Gestion du bouton de suppression
-    imageContainer.querySelector('.remove-cover').addEventListener('click', () => {
-        imageContainer.innerHTML = '';
-        const imageUrlField = document.getElementById('id_image_url_field');
-        if (imageUrlField) imageUrlField.value = '';
-    });
+    imageContainer.innerHTML = `<img src="${imageUrl}" style="max-height:200px; margin-top:10px;">`;
 }
