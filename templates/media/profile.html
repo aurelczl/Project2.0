@@ -134,6 +134,7 @@
   </div>
 
   <script>
+
   function filterItems() {
     // Récupérer catégorie sélectionnée
     let selectedCategory = 'all';
@@ -160,6 +161,7 @@
     let foundAny = false;
 
     items.forEach(img => {
+
       let itemCategory = img.dataset.category;  // on mettra ça dans template
       let itemGenres = img.dataset.genres ? img.dataset.genres.split(',') : [];
       let itemStatut = img.dataset.statut || '';
@@ -182,6 +184,11 @@
         img.style.display = 'none';
       }
     });
+
+    // Mettre à jour Masonry après filtrage
+    if (typeof masonryInstance !== 'undefined' && masonryInstance) {
+      masonryInstance.layout();
+    }
 
     // Afficher message "Rien trouvé" si rien ne correspond
     let messageEl = document.getElementById('no-results-msg');
