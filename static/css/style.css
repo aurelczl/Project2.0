@@ -765,3 +765,71 @@
     align-items: flex-start;
   }
 }
+
+/* Bloc note Home.html */
+/* Bloc-notes vintage */
+/* Bloc-notes responsive */
+.vintage-note {
+    width: 95%;
+    max-width: 1200px; /* Largeur maximale raisonnable */
+    margin: 30px auto;
+    padding: 25px;
+    background-color: #fff9e6;
+    border: 1px solid #e0d0a0;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
+    font-family: 'Times New Roman', serif;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.note-content {
+    min-height: 150px;
+    position: relative;
+}
+
+#user-notes {
+    width: 100%;
+    min-height: 150px;
+    height: auto; /* Hauteur automatique */
+    border: none;
+    background: transparent;
+    resize: none; /* Désactive le redimensionnement manuel */
+    font-family: 'Times New Roman', serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 10px 0;
+    overflow: hidden; /* Cache la barre de défilement initiale */
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.note-actions {
+    text-align: right;
+}
+
+#save-notes {
+    padding: 5px 15px;
+    background-color: #8b7a5e;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: 'Times New Roman', serif;
+    transition: background-color 0.3s;
+}
+
+#save-notes:hover {
+    background-color: #6b5a4e;
+}
+
+/* Effet de papier vieilli */
+.note-paper-effect {
+    position: absolute;
+    top: 0;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(0,0,0,0.1) 1px, transparent 1px);
+    background-size: 10px 10px;
+    opacity: 0.3;
+    pointer-events: none;
+}
