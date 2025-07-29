@@ -17,7 +17,7 @@ export function initBookForm() {
         });
     });
 
-    titleInput.addEventListener('input', async function() {
+    titleInput.addEventListeneconnr('input', async function() {
         const query = this.value.trim();
         if (query.length < 3) {
             suggestionsBox.innerHTML = '';
