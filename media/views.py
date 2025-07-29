@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Book, Series, Movie, Manga, Genre
 from .forms import BookForm, SeriesForm, MovieForm, MangaForm
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponse
 import requests
 from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
@@ -11,8 +11,111 @@ from django.contrib.auth import login
 from django.db.models import Q
 import json
 from bs4 import BeautifulSoup
+from .data_utils import export_user_data, import_user_data
+import os
+from django.conf import settings
+from django.core.files import File
 
-# Gestion des données local pour render :
+###################################################################
+# Sauvegarde de données compte sur son appareil sous format json :
+
+@login_required
+def backup_account(request):
+    json_io = export_user_data(request.user)
+    response = HttpResponse(
+        json_io.getvalue(),
+        content_type='application/json'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{request.user.username}_backup.json"'
+    return response
+
+@csrf_exempt # Nouvel import de données 
+@login_required
+def import_selected_items(request):
+    if request.method != 'POST':
+        return JsonResponse({'message': 'Méthode non autorisée'}, status=405)
+
+    try:
+        body = request.body.decode('utf-8')
+        print("Reçu JSON brut :", body)  # 🔍 Ajout pour déboguer
+
+        data = json.loads(body)
+        user = request.user
+
+        def get_or_create_genres(genre_list):
+            genres = []
+            for g in genre_list:
+                genre, _ = Genre.objects.get_or_create(name=g)
+                genres.append(genre)
+            return genres
+
+        for category, items in data.items():
+            for item in items:
+                genres = get_or_create_genres(item.get('genres', []))
+
+                model_map = {
+                    'manga': Manga,
+                    'book': Book,
+                    'series': Series,
+                    'movie': Movie
+                }
+
+                model = model_map.get(category)
+                if not model:
+                    continue
+
+                fields = {
+                    'user': user,
+                    'title': item.get('title'),
+                    'statut': item.get('statut'),
+                    'global_rate': item.get('global_rate', 0),
+                    'finished_year': item.get('finished_year'),
+                    'finished_month': item.get('finished_month'),
+                    'finished_day': item.get('finished_day'),
+                }
+
+                # Ajouts spécifiques selon modèle
+                if category == 'manga':
+                    fields['scan'] = item.get('scan')
+                    fields['reading_website'] = item.get('reading_website')
+                elif category == 'book':
+                    fields['author'] = item.get('author')
+                    fields['edition'] = item.get('edition')
+                    fields['pageCount'] = item.get('pageCount')
+                elif category == 'series':
+                    fields['seasons'] = item.get('seasons')
+                    fields['episodes'] = item.get('episodes')
+                    fields['saison'] = item.get('saison')
+                    fields['episode'] = item.get('episode')
+                elif category == 'movie':
+                    fields['director'] = item.get('director')
+
+                obj = model.objects.create(**fields)
+                obj.genres.set(genres)
+
+                # Copier image depuis local si dispo
+                image_path = item.get('image')
+                if image_path:
+                    full_path = os.path.join(settings.MEDIA_ROOT, image_path)
+                    if os.path.exists(full_path):
+                        with open(full_path, 'rb') as f:
+                            django_file = File(f)
+                            # Attribue le fichier au champ image sans dupliquer le nom complet du chemin
+                            obj.image.save(os.path.basename(image_path), django_file)
+                    else:
+                        print(f"⚠️ Image introuvable : {full_path}")
+
+                obj.save()
+
+        return JsonResponse({'status': 'ok'})
+
+    except Exception as e:
+        import traceback
+        print("Erreur pendant l'import :", traceback.format_exc())  # 🔍 log complet
+        return JsonResponse({'message': str(e)}, status=400)
+
+#########################################################
+# Gestion des données local pour render : Ceci ne fonctionne pas
 
 @csrf_exempt
 def load_data(request):
@@ -26,7 +129,7 @@ def load_data(request):
         
 # Create your views here.
 
-
+############################################################
 ### VUES API BOOKS : Openlibrary.org / babelio /booknode ###
 
 # Ancienne version récupération d'info openlib
@@ -173,11 +276,7 @@ def book_suggestions(request):
 
     return JsonResponse(results[:5], safe=False)
 
-def fetch_openlib_suggestions(request):
-    query = request.GET.get('q', '').strip()
-    if len(query) < 3:
-        return JsonResponse([], safe=False)
-
+def fetch_openlib_suggestions(query):
     try:
         r = requests.get(
             "https://openlibrary.org/search.json",
@@ -193,29 +292,25 @@ def fetch_openlib_suggestions(request):
             title = doc.get("title", "").strip()
             languages = doc.get("language", [])
             
-            # Filtrer par anglais/français si langue spécifiée
             if languages and not any(lang in ['eng', 'fre', 'fr', 'en'] for lang in languages):
                 continue
                 
             if title and title not in seen_titles:
-                # Ajouter l'auteur si disponible pour mieux identifier
-                authors = ", ".join(doc.get("author_name", [])[:2])
-                display_text = f"{title} {' - ' + authors if authors else ''}"
-                
                 suggestions.append({
                     'title': title,
-                    'display': display_text,
-                    'authors': doc.get("author_name", [])
+                    'author': ", ".join(doc.get("author_name", [])[:2]) if doc.get("author_name") else '',
+                    'source': 'openlibrary'
                 })
                 seen_titles.add(title)
                 
             if len(suggestions) >= 5:
                 break
 
-        return JsonResponse(suggestions, safe=False)
+        return suggestions
 
     except Exception as e:
-        return JsonResponse([], safe=False)
+        print(f"Erreur OpenLibrary: {e}")
+        return []
 
 def fetch_babelio_suggestions(query):
     try:

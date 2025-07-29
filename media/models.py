@@ -7,6 +7,13 @@ from cloudinary.models import CloudinaryField
 
 RENDER = os.getenv('RENDER', 'False').lower() == 'true'
 
+# CRéation de sauvegarde de compte :
+
+class UserBackup(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    json_file = models.FileField(upload_to='user_backups/')
+    updated_at = models.DateTimeField(auto_now=True)
+
 # Create your models here.
 
 class Genre(models.Model):

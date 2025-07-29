@@ -290,6 +290,211 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 </script>
 
+<!-- templates/backup.html -->
+<input type="file" id="jsonFile" accept=".json" style="display: none;" onchange="handleFile(event)">
+<button onclick="document.getElementById('jsonFile').click()">Import des données</button>
+<div id="library-container"></div>
+<button onclick="importSelected()">📥 Importer la sélection</button>
+<div id="library-container"></div>
+
+<script>
+let parsedItems = {};
+
+function handleFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const json = JSON.parse(e.target.result);
+            parsedItems = json.items;
+            displayLibrary(parsedItems);
+        } catch (err) {
+            alert("Fichier JSON invalide");
+            console.error("Erreur de parsing JSON", err);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function displayLibrary(data) {
+    const container = document.getElementById('library-container');
+    container.innerHTML = '';
+
+    for (const [category, items] of Object.entries(data)) {
+        if (!Array.isArray(items)) continue;
+
+        const section = document.createElement('div');
+        section.classList.add('category-section');
+
+        const heading = document.createElement('h2');
+        heading.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        section.appendChild(heading);
+
+        const list = document.createElement('div');
+        list.classList.add('item-list');
+
+        items.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.classList.add('item-card');
+
+            // checkbox
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.dataset.category = category;
+            checkbox.dataset.index = index;
+            card.appendChild(checkbox);
+
+            // image
+            if (item.image) {
+                const img = document.createElement('img');
+                img.src = '/' + item.image;
+                img.classList.add('item-image');
+                card.appendChild(img);
+            }
+
+            const title = document.createElement('h3');
+            title.textContent = item.title;
+            card.appendChild(title);
+
+            if (item.statut) {
+                const status = document.createElement('p');
+                status.textContent = `Statut: ${item.statut}`;
+                card.appendChild(status);
+            }
+
+            if (item.global_rate !== undefined) {
+                const rate = document.createElement('p');
+                rate.textContent = `Note: ${item.global_rate}/100`;
+                card.appendChild(rate);
+            }
+
+            list.appendChild(card);
+        });
+
+        section.appendChild(list);
+        container.appendChild(section);
+    }
+}
+
+async function importSelected() {
+    const checkboxes = document.querySelectorAll('#library-container input[type="checkbox"]:checked');
+    if (!checkboxes.length) return alert("Aucun élément sélectionné.");
+
+    const selectedItems = {};
+
+    checkboxes.forEach(checkbox => {
+        const category = checkbox.dataset.category;
+        const index = parseInt(checkbox.dataset.index);
+        if (!selectedItems[category]) selectedItems[category] = [];
+        selectedItems[category].push(parsedItems[category][index]);
+    });
+
+    try {
+        const response = await fetch('/import-selected/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: JSON.stringify(selectedItems),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Import réussi !');
+            location.reload();
+        } else {
+            alert('Erreur: ' + (result.message || 'Erreur inconnue'));
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'import");
+    }
+}
+
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+</script>
+
+<button onclick="backup()">Télécharger la sauvegarde</button>
+
+<script>
+// Sauvegarde
+async function backup() {
+    window.location.href = '/backup/';  // Déclenche le téléchargement
+}
+
+// Import
+async function importData() {
+    const fileInput = document.getElementById('jsonFile');
+    if (!fileInput.files.length) {
+        alert('Veuillez sélectionner un fichier');
+        
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('json_file', fileInput.files[0]);
+        
+        const response = await fetch('/import/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  // Important pour Django
+            }
+        });
+
+        const result = await response.json();  // Ceci échoue si le serveur renvoie du HTML
+        
+        if (!response.ok) {
+            throw new Error(result.message || 'Erreur serveur');
+        }
+        
+        alert('Import réussi !');
+        location.reload();  // Rechargez la page si nécessaire
+        
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert(`Échec de l'import: ${error.message}`);
+    }
+};
+</script>
+
+
+<style>
+  .category-section {
+    margin-bottom: 30px;
+  }
+
+  .item-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .item-card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    width: 200px;
+    background-color: #f9f9f9;
+  }
+
+  .item-card h3 {
+    margin-top: 0;
+  }
+
+  .item-image {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+</style>
+
   <!-- Font Awesome pour les icônes -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %}

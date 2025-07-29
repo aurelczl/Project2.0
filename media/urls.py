@@ -32,6 +32,9 @@ urlpatterns = [
     path('api/book-suggestions/', views.book_suggestions, name='book_suggestions'),
     path('api/fetch-book-info/', views.fetch_book_info, name='fetch_book_info'),
 
+    path('backup/', views.backup_account, name='backup'),
+    path('import-selected/', views.import_selected_items, name='import_selected_items'),
+
 
 
 ]
