@@ -1,11 +1,12 @@
-// static/js/add_book.js
+// static/js/add_book_v2.js
+
 
 export function initBookForm() {
     const titleInput = document.getElementById('id_title');
     if (!titleInput) return;
 
     const suggestionsBox = document.getElementById('title-suggestions-openlib');
-    let currentSource = 'openlibrary';
+    let currentSource = 'library'; // Source par défaut = votre bibliothèque
 
     // Gestion du changement de source
     document.querySelectorAll('.btn-source').forEach(btn => {
@@ -17,7 +18,7 @@ export function initBookForm() {
         });
     });
 
-    titleInput.addEventListeneconnr('input', async function() {
+    titleInput.addEventListener('input', async function() {
         const query = this.value.trim();
         if (query.length < 3) {
             suggestionsBox.innerHTML = '';
@@ -25,11 +26,28 @@ export function initBookForm() {
         }
 
         try {
-            const response = await fetch(`/api/book-suggestions/?source=${currentSource}&q=${encodeURIComponent(query)}`);
-            if (!response.ok) throw new Error('Erreur réseau');
+            let items = [];
             
-            const items = await response.json();
-            displaySuggestions(items, titleInput, suggestionsBox);
+            // Recherche d'abord dans votre bibliothèque
+            if (currentSource === 'library') {
+                const response = await fetch(`/api/search-books/?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Erreur réseau');
+                items = await response.json();
+                
+                // Si aucun résultat, chercher dans les autres sources
+                if (items.length === 0 && document.querySelector('.btn-source[data-source="openlibrary"]')) {
+                    currentSource = 'openlibrary';
+                    document.querySelector('.btn-source[data-source="openlibrary"]').click();
+                    return;
+                }
+            } else {
+                // Recherche dans les APIs externes
+                const response = await fetch(`/api/book-suggestions/?source=${currentSource}&q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Erreur réseau');
+                items = await response.json();
+            }
+            
+            displaySuggestions(items, titleInput, suggestionsBox, currentSource);
         } catch (error) {
             console.error('Error:', error);
             suggestionsBox.innerHTML = '<div class="suggestion-item">Erreur de chargement</div>';
@@ -44,7 +62,7 @@ export function initBookForm() {
     });
 }
 
-function displaySuggestions(items, titleInput, suggestionsBox) {
+function displaySuggestions(items, titleInput, suggestionsBox, source) {
     suggestionsBox.innerHTML = '';
     
     if (!items || items.length === 0) {
@@ -57,7 +75,7 @@ function displaySuggestions(items, titleInput, suggestionsBox) {
         div.innerHTML = `
             <strong>${item.title}</strong>
             ${item.author ? `<br><small>${item.author}</small>` : ''}
-            <small class="source-badge">${item.source}</small>
+            <small class="source-badge">${source === 'library' ? 'Ma Bibliothèque' : source}</small>
         `;
         
         div.classList.add('suggestion-item');
@@ -65,13 +83,43 @@ function displaySuggestions(items, titleInput, suggestionsBox) {
             titleInput.value = item.title;
             suggestionsBox.innerHTML = '';
             
-            const bookDetails = await fetchCompleteBookDetails(item.title, item.source);
-            updateBookDetails({...item, ...bookDetails});
+            // Si c'est de notre bibliothèque, on a déjà toutes les infos
+            if (source === 'library') {
+                // Solution dynamique - remplace tout updateBookDetails
+                Object.keys(item).forEach(key => {
+                    const field = document.getElementById(`id_${key}`);
+                    if (field && field.type !== 'hidden' && item[key]) {
+                        field.value = item[key];
+                    }
+                });
+
+                // Gestion spéciale de l'image
+                if (item.image_url) {
+                    updateBookCover(item.image_url);
+                }
+
+                // Champ caché pour PublicBook existant
+                let hiddenField = document.getElementById('public_book_id');
+                if (!hiddenField) {
+                    hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.id = 'public_book_id';
+                    hiddenField.name = 'public_book_id';
+                    titleInput.parentNode.appendChild(hiddenField);
+                }
+                hiddenField.value = item.id;
+            } else {
+                const bookDetails = await fetchCompleteBookDetails(item.title, source);
+                // Gardez l'ancienne méthode pour les sources externes
+                updateBookDetails({...item, ...bookDetails});
+            }
         });
         
         suggestionsBox.appendChild(div);
     });
 }
+
+// ... (le reste des fonctions reste inchangé)
 
 async function fetchCompleteBookDetails(title, source) {
     try {
@@ -85,25 +133,24 @@ async function fetchCompleteBookDetails(title, source) {
 }
 
 function updateBookDetails(item) {
-    // Remplir l'auteur
-    if (item.author) {
-        const authorField = document.getElementById('id_author');
-        if (authorField) authorField.value = item.author;
-    }
-    
-    // Remplir l'édition
-    if (item.edition) {
-        const editionField = document.getElementById('id_edition');
-        if (editionField) editionField.value = item.edition;
-    }
-    
-    // Remplir le nombre de pages
-    if (item.pageCount) {
-        const pageCountField = document.getElementById('id_pageCount');
-        if (pageCountField) pageCountField.value = item.pageCount;
-    }
-    
-    // Gestion des images
+    // Liste des champs spécifiques aux APIs externes
+    const apiFields = {
+        'author': 'id_author',
+        'edition': 'id_edition', 
+        'pageCount': 'id_pageCount',
+        'cover_id': null, // Géré séparément
+        'cover_url': null
+    };
+
+    // Remplissage des champs standards
+    Object.entries(apiFields).forEach(([key, fieldId]) => {
+        if (fieldId && item[key]) {
+            const field = document.getElementById(fieldId);
+            if (field) field.value = item[key];
+        }
+    });
+
+    // Gestion spéciale des images
     if (item.source === 'openlibrary' && item.cover_id) {
         updateBookCover(`https://covers.openlibrary.org/b/id/${item.cover_id}-M.jpg`);
     } 

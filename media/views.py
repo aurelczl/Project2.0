@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Book, Series, Movie, Manga, Genre
+from .models import Book, PublicBook, Series, Movie, Manga, Genre
 from .forms import BookForm, SeriesForm, MovieForm, MangaForm
 from django.http import Http404, JsonResponse, HttpResponse
 import requests
@@ -29,90 +29,110 @@ def backup_account(request):
     response['Content-Disposition'] = f'attachment; filename="{request.user.username}_backup.json"'
     return response
 
-@csrf_exempt # Nouvel import de données 
+@csrf_exempt
 @login_required
 def import_selected_items(request):
     if request.method != 'POST':
         return JsonResponse({'message': 'Méthode non autorisée'}, status=405)
 
     try:
-        body = request.body.decode('utf-8')
-        print("Reçu JSON brut :", body)  # 🔍 Ajout pour déboguer
-
-        data = json.loads(body)
+        data = json.loads(request.body.decode('utf-8'))
         user = request.user
 
         def get_or_create_genres(genre_list):
-            genres = []
-            for g in genre_list:
-                genre, _ = Genre.objects.get_or_create(name=g)
-                genres.append(genre)
-            return genres
+            return [Genre.objects.get_or_create(name=g)[0] for g in genre_list if g]
 
         for category, items in data.items():
             for item in items:
                 genres = get_or_create_genres(item.get('genres', []))
 
-                model_map = {
-                    'manga': Manga,
-                    'book': Book,
-                    'series': Series,
-                    'movie': Movie
-                }
+                if category == 'book':
+                    # Gestion spécifique pour les livres
+                    public_book, _ = PublicBook.objects.get_or_create(
+                        title=item.get('title'),
+                        defaults={
+                            'author': item.get('author'),
+                            'edition': item.get('edition'),
+                            'pageCount': item.get('pageCount'),
+                        }
+                    )
 
-                model = model_map.get(category)
-                if not model:
-                    continue
+                    # Création du Book lié
+                    book = Book.objects.create(
+                        user=user,
+                        public_book=public_book,
+                        statut=item.get('statut'),
+                        global_rate=item.get('global_rate', 0),
+                        finished_year=item.get('finished_year'),
+                        finished_month=item.get('finished_month'),
+                        finished_day=item.get('finished_day'),
+                    )
+                    book.genres.set(genres)
 
-                fields = {
-                    'user': user,
-                    'title': item.get('title'),
-                    'statut': item.get('statut'),
-                    'global_rate': item.get('global_rate', 0),
-                    'finished_year': item.get('finished_year'),
-                    'finished_month': item.get('finished_month'),
-                    'finished_day': item.get('finished_day'),
-                }
+                    # Gestion de l'image
+                    if item.get('image'):
+                        handle_image_import(public_book, item['image'])
 
-                # Ajouts spécifiques selon modèle
-                if category == 'manga':
-                    fields['scan'] = item.get('scan')
-                    fields['reading_website'] = item.get('reading_website')
-                elif category == 'book':
-                    fields['author'] = item.get('author')
-                    fields['edition'] = item.get('edition')
-                    fields['pageCount'] = item.get('pageCount')
-                elif category == 'series':
-                    fields['seasons'] = item.get('seasons')
-                    fields['episodes'] = item.get('episodes')
-                    fields['saison'] = item.get('saison')
-                    fields['episode'] = item.get('episode')
-                elif category == 'movie':
-                    fields['director'] = item.get('director')
+                else:
+                    # Gestion des autres modèles (manga, series, movie)
+                    model_map = {
+                        'manga': Manga,
+                        'series': Series,
+                        'movie': Movie
+                    }
+                    if category not in model_map:
+                        continue
 
-                obj = model.objects.create(**fields)
-                obj.genres.set(genres)
+                    model = model_map[category]
+                    fields = {
+                        'user': user,
+                        'title': item.get('title'),
+                        'statut': item.get('statut'),
+                        'global_rate': item.get('global_rate', 0),
+                        'finished_year': item.get('finished_year'),
+                        'finished_month': item.get('finished_month'),
+                        'finished_day': item.get('finished_day'),
+                    }
 
-                # Copier image depuis local si dispo
-                image_path = item.get('image')
-                if image_path:
-                    full_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                    if os.path.exists(full_path):
-                        with open(full_path, 'rb') as f:
-                            django_file = File(f)
-                            # Attribue le fichier au champ image sans dupliquer le nom complet du chemin
-                            obj.image.save(os.path.basename(image_path), django_file)
-                    else:
-                        print(f"⚠️ Image introuvable : {full_path}")
+                    # Champs spécifiques
+                    if category == 'manga':
+                        fields.update({
+                            'scan': item.get('scan'),
+                            'reading_website': item.get('reading_website')
+                        })
+                    elif category == 'series':
+                        fields.update({
+                            'seasons': item.get('seasons'),
+                            'episodes': item.get('episodes'),
+                            'saison': item.get('saison'),
+                            'episode': item.get('episode')
+                        })
+                    elif category == 'movie':
+                        fields['director'] = item.get('director')
 
-                obj.save()
+                    obj = model.objects.create(**fields)
+                    obj.genres.set(genres)
+
+                    if item.get('image'):
+                        handle_image_import(obj, item['image'])
 
         return JsonResponse({'status': 'ok'})
 
     except Exception as e:
         import traceback
-        print("Erreur pendant l'import :", traceback.format_exc())  # 🔍 log complet
+        print("Erreur pendant l'import:", traceback.format_exc())
         return JsonResponse({'message': str(e)}, status=400)
+
+def handle_image_import(obj, image_path):
+    """Gère l'importation d'une image depuis le chemin sauvegardé"""
+    full_path = os.path.join(settings.MEDIA_ROOT, image_path)
+    if os.path.exists(full_path):
+        with open(full_path, 'rb') as f:
+            django_file = File(f)
+            obj.image.save(os.path.basename(image_path), django_file)
+    else:
+        print(f"⚠️ Image introuvable: {full_path}")
+
 
 #########################################################
 # Gestion des données local pour render : Ceci ne fonctionne pas
@@ -128,6 +148,29 @@ def load_data(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
         
 # Create your views here.
+
+############################################################
+# Recherche dans notre propre base de données : PublicBook
+
+@require_GET
+def search_books(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 3:
+        return JsonResponse([], safe=False)
+
+    books = PublicBook.objects.filter(title__icontains=query)[:5]
+    
+    results = []
+    for book in books:
+        book_data = model_to_dict(book)  # Convertit le modèle en dictionnaire
+        book_data['model'] = 'publicbook'
+        # Nettoie les valeurs nulles
+        book_data = {k: v for k, v in book_data.items() if v not in (None, '', [])}
+        if book.image:
+            book_data['image_url'] = book.image.url
+        results.append(book_data)
+    
+    return JsonResponse(results, safe=False)
 
 ############################################################
 ### VUES API BOOKS : Openlibrary.org / babelio /booknode ###
@@ -364,7 +407,7 @@ def fetch_booknode_suggestions(query):
         print(f"Erreur BookNode: {e}")
         return []
         
-###### BASE ######
+################# BASE ##################################
 
 def home(request):
     return render(request, 'media/home.html')
@@ -417,9 +460,9 @@ def edit_item(request, model_name, item_id):
     }.get(model_class)
 
     if request.method == 'POST':
-        form = form_class(request.POST, request.FILES, instance=item)
+        form = form_class(request.POST, request.FILES, user=request.user, instance=item)
         if form.is_valid():
-            item = form.save(user=request.user)
+            item = form.save()
             return redirect('item_detail', model_name=model_name, item_id=item.id)
     else:
         form = form_class(instance=item)
@@ -541,6 +584,7 @@ def profile(request):
         'items': all_items
     })
 
+""" OBSCOLETE
 @login_required
 def home(request):
     books = Book.objects.filter(user=request.user)
@@ -550,7 +594,7 @@ def home(request):
     return render(request, 'media/home.html',
                   {'books': books, 'series': series,
                    'movies': movies, 'manga': mangas})
-
+"""
 MODEL_MAP = {
     'book': (Book, BookForm),
     'movie': (Movie, MovieForm),
@@ -593,6 +637,32 @@ def add_manga(request):
         'all_genres': all_genres
     })
 
+#################### ADD_BOOK ##############
+# Version 2.0 : Book modèle proxy pour les class Public et User Book
+
+@login_required
+def add_book(request):
+    if request.method == 'POST':
+        form = BookForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            form.save()  # Retourne un UserBook
+            return redirect('profile')
+    else:
+        form = BookForm(user=request.user)  # Passer l'user au form
+    
+    item = 'book'
+    all_genres = Genre.objects.all()
+
+    return render(request, 'media/add_item.html', {
+        'form': form,
+        'title': 'Ajouter un livre',
+        'all_genres': all_genres,
+        'item': item,
+    })
+
+# Version 1.0 : Obscolète si 2.0 décommenté
+
+"""
 @login_required
 def add_book(request):
     if request.method == 'POST':
@@ -613,7 +683,8 @@ def add_book(request):
         'all_genres': all_genres,
         'item' : item,
     })
-
+"""
+#################### ADD_SERIES #########################
 @login_required
 def add_series(request):
     if request.method == 'POST':

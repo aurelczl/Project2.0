@@ -18,14 +18,14 @@
       <div class="item-details">
         <!-- Champs principaux -->
         <div class="details-section">
-          {% for field in form.visible_fields %}
-            {% if field.name not in 'raw_genres finished_year finished_month finished_day image' %}
-              <div class="detail-row">
-                <span class="detail-label">{{ field.label }} :</span>
-                <span class="detail-value">{{ field.value|default:"–" }}</span>
-              </div>
-            {% endif %}
-          {% endfor %}
+            {% for field in form.visible_fields %}
+              {% if field.name not in 'raw_genres finished_year finished_month finished_day image' %}
+                <div class="detail-row">
+                  <span class="detail-label">{{ field.label }} :</span>
+                  <span class="detail-value">{{ field.value|default:"–" }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
         </div>
 
         <!-- Date de fin -->

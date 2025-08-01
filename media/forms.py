@@ -1,5 +1,7 @@
 from django import forms
-from .models import Book, Series, Movie, Manga, Genre
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
+from .models import Book, PublicBook, Series, Movie, Manga, Genre
 import datetime
 
 class MangaForm(forms.ModelForm):
@@ -62,21 +64,41 @@ class MangaForm(forms.ModelForm):
         genres = self.cleaned_data.get('raw_genres', [])
         manga.genres.set(genres)
         return manga
-    
+
+""" 
+Création form book pour la version 2.0 
+composé de public et user book : Version 1.0 à commenter
+"""
+# Version 2.0 
+
 class BookForm(forms.ModelForm):
-    raw_genres = forms.CharField(
-        widget=forms.HiddenInput(),
-        required=False
+    raw_genres = forms.CharField(widget=forms.HiddenInput(), required=False)
+    
+    # Déclarez explicitement les champs de PublicBook comme champs de formulaire
+    title = forms.CharField(max_length=200)
+    author = forms.CharField(max_length=100, required=False)
+    edition = forms.CharField(max_length=100, required=False)
+    pageCount = forms.IntegerField(
+        required=False,
+        validators=[MinValueValidator(0), MaxValueValidator(10000)]
     )
+    image = forms.ImageField(required=False)
 
     class Meta:
         model = Book
-        fields = ['title', 'author', 'statut',
-        'finished_year','finished_month','finished_day',
-         'edition', 'pageCount', 'global_rate', 'image']
+        fields = ['statut', 'finished_year', 'finished_month', 'finished_day', 'global_rate']
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        
+        # Pré-remplir les valeurs si instance existe
+        if self.instance.pk:
+            self.fields['title'].initial = self.instance.public_book.title
+            self.fields['author'].initial = self.instance.public_book.author
+            self.fields['edition'].initial = self.instance.public_book.edition
+            self.fields['pageCount'].initial = self.instance.public_book.pageCount
+            self.fields['image'].initial = self.instance.public_book.image
 
     def clean(self):
         cleaned_data = super().clean()
@@ -113,17 +135,42 @@ class BookForm(forms.ModelForm):
             genres.append(genre)
         return genres
 
-    def save(self, user, commit=True):
+    def save(self, commit=True):
+        # Créer/mettre à jour PublicBook d'abord
+        public_book, created = PublicBook.objects.get_or_create(
+            title=self.cleaned_data['title'],
+            defaults={
+                'author': self.cleaned_data['author'],
+                'edition': self.cleaned_data['edition'],
+                'pageCount': self.cleaned_data['pageCount'],
+                'image': self.cleaned_data.get('image')
+            }
+        )
+        
+        if not created:
+            # Mettre à jour les champs si le livre existait déjà
+            public_book.author = self.cleaned_data['author']
+            public_book.edition = self.cleaned_data['edition']
+            public_book.pageCount = self.cleaned_data['pageCount']
+            if self.cleaned_data.get('image'):
+                public_book.image = self.cleaned_data['image']
+            public_book.save()
+
+        # Créer/mettre à jour Book
         book = super().save(commit=False)
-        book.user = user
+        book.user = self.user
+        book.public_book = public_book
+        
         if commit:
             book.save()
+            self.save_m2m()
 
-        # genres = self.cleaned_data.get('genres') ne marche plus
+        # Gestion des genres
         genres = self.cleaned_data.get('raw_genres', [])
-        book.genres.set(genres)
+        if genres:
+            book.genres.set(genres)
+        
         return book
-
 
 class SeriesForm(forms.ModelForm):
     raw_genres = forms.CharField(

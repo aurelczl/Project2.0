@@ -4,16 +4,17 @@
 {% block content %}
   <h2>{{ title }}</h2>
 
-   <!-- Nouvelle section pour choisir la source -->
+  <!-- Modifier la section source-selector -->
   {% if item == 'book' %}
-    <div class="source-selector" style="margin-bottom: 20px;">
-      <small>Choisissez une source :</small><br>
-      <div class="btn-group" role="group">
-        <button type="button" class="btn btn-source active" data-source="openlibrary">OpenLibrary</button>
-        <button type="button" class="btn btn-source" data-source="babelio">Babelio</button>
-        <button type="button" class="btn btn-source" data-source="booknode">BookNode</button>
-      </div>
+  <div class="source-selector" style="margin-bottom: 20px;">
+    <small>Choisissez une source :</small><br>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-source active" data-source="library">Ma Bibliothèque</button>
+      <button type="button" class="btn btn-source" data-source="openlibrary">OpenLibrary</button>
+      <button type="button" class="btn btn-source" data-source="babelio">Babelio</button>
+      <button type="button" class="btn btn-source" data-source="booknode">BookNode</button>
     </div>
+  </div>
   {% endif %}
 
   <form method="post" enctype="multipart/form-data">
@@ -35,6 +36,10 @@
 
     {% endfor %}
     
+    {% if item == 'book' %}
+    <input type="hidden" name="public_book_id" id="public_book_id">
+    {% endif %}
+
     <div>
        <label>Année de fin</label><br>
        {{ form.finished_year }}
@@ -104,7 +109,7 @@
 
   {% if item == 'book' %}
   <script type="module">
-    import { initBookForm } from "{% static 'js/add_book.js' %}";
+    import { initBookForm } from "{% static 'js/add_book_v2.js' %}";
     document.addEventListener('DOMContentLoaded', initBookForm);
   </script>
   {% endif %}
