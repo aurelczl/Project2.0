@@ -90,7 +90,7 @@ class PublicBook(models.Model):
 
 class Book(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    public_book = models.ForeignKey(PublicBook, on_delete=models.CASCADE)
+    public_book = models.ForeignKey(PublicBook, on_delete=models.CASCADE, related_name='books')
     
     STATUT_CHOICES = {
         "Fini": "Fini",

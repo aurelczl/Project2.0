@@ -7,6 +7,7 @@ import requests
 from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import login
 from django.db.models import Q
 import json
@@ -136,7 +137,7 @@ def handle_image_import(obj, image_path):
 
 #########################################################
 # Gestion des données local pour render : Ceci ne fonctionne pas
-
+""" OBSCOLETE ?
 @csrf_exempt
 def load_data(request):
     if request.method == 'POST':
@@ -146,8 +147,15 @@ def load_data(request):
             return JsonResponse({'status': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
-        
-# Create your views here.
+""" 
+###################### GESTION SUPER USER #################
+
+@staff_member_required
+def admin_public_library(request):
+    public_books = PublicBook.objects.all().order_by('title')
+    return render(request, 'media/admin_public_library.html', {
+        'public_books': public_books
+    })
 
 ############################################################
 # Recherche dans notre propre base de données : PublicBook
@@ -162,13 +170,16 @@ def search_books(request):
     
     results = []
     for book in books:
-        book_data = model_to_dict(book)  # Convertit le modèle en dictionnaire
-        book_data['model'] = 'publicbook'
-        # Nettoie les valeurs nulles
-        book_data = {k: v for k, v in book_data.items() if v not in (None, '', [])}
-        if book.image:
-            book_data['image_url'] = book.image.url
-        results.append(book_data)
+        results.append({
+            'id': book.id,
+            'title': book.title,
+            'author': book.author if book.author else '',
+            'edition': book.edition if book.edition else '',
+            'pageCount': book.pageCount if book.pageCount else '',
+            'image_url': book.image.url if book.image else '',
+            'source': 'library',
+            'model': 'publicbook'
+        })
     
     return JsonResponse(results, safe=False)
 
@@ -584,17 +595,6 @@ def profile(request):
         'items': all_items
     })
 
-""" OBSCOLETE
-@login_required
-def home(request):
-    books = Book.objects.filter(user=request.user)
-    series = Series.objects.filter(user=request.user)
-    movies = Movie.objects.filter(user=request.user)
-    mangas = Manga.objects.filter(user=request.user)
-    return render(request, 'media/home.html',
-                  {'books': books, 'series': series,
-                   'movies': movies, 'manga': mangas})
-"""
 MODEL_MAP = {
     'book': (Book, BookForm),
     'movie': (Movie, MovieForm),
@@ -660,30 +660,6 @@ def add_book(request):
         'item': item,
     })
 
-# Version 1.0 : Obscolète si 2.0 décommenté
-
-"""
-@login_required
-def add_book(request):
-    if request.method == 'POST':
-        form = BookForm(request.POST, request.FILES)
-        if form.is_valid():
-            book = form.save(user=request.user)
-            return redirect('profile')
-    else:
-        form = BookForm()
-    
-    item = 'book'
-    # Envoie tous les genres pour peupler la liste Select2
-    all_genres = Genre.objects.all()
-
-    return render(request, 'media/add_item.html', {
-        'form': form,
-        'title': 'Ajouter un livre',
-        'all_genres': all_genres,
-        'item' : item,
-    })
-"""
 #################### ADD_SERIES #########################
 @login_required
 def add_series(request):

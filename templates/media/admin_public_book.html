@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Bibliothèque Publique (Admin)</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Titre</th>
+            <th>Auteur</th>
+            <th>Édition</th>
+            <th>Utilisateurs associés</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in public_books %}
+        <tr>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author|default:"-" }}</td>
+            <td>{{ book.edition|default:"-" }}</td>
+            <td>
+                {{ book.userbook_set.count }} utilisateur(s)
+                <ul>
+                    {% for user_book in book.userbook_set.all|slice:":3" %}
+                    <li>{{ user_book.user.username }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                <a href="{% url 'admin:media_publicbook_change' book.id %}" class="btn btn-sm btn-info">
+                    Modifier (Admin)
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

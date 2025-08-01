@@ -23,7 +23,7 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('genre/add/', views.add_genre, name='add_genre'),
     path('library/', views.library_view, name='library'),
-    path('admin/load_data/', views.load_data, name='load_data'),
+    #path('admin/load_data/', views.load_data, name='load_data'),
 
     # Pour openlibrary : Ancienne version
     #path('api/fetch-book-info-openlib/', views.fetch_book_info_openlib, name='fetch_book_info_openlib'),
@@ -32,7 +32,7 @@ urlpatterns = [
     path('api/book-suggestions/', views.book_suggestions, name='book_suggestions'),
     path('api/fetch-book-info/', views.fetch_book_info, name='fetch_book_info'),
     path('api/search-books/', views.search_books, name='search_books'),
-    
+
     path('backup/', views.backup_account, name='backup'),
     path('import-selected/', views.import_selected_items, name='import_selected_items'),
 
