@@ -670,48 +670,104 @@ def home(request):
 
 ########### Informations publics ########################
 from django.db.models.functions import Round
-from django.db.models import Avg, Count, FloatField
+from django.db.models import Avg, Count, FloatField, CharField
+
+from django.db.models import Count, Avg, Value
+from django.db.models.functions import Round, Coalesce
 
 def public_dynamic_page(request):
-    sort_by = request.GET.get('sort', 'popularity')  # 'popularity' ou 'rating'
+    sort_by = request.GET.get('sort', 'popularity')
+    content_type = request.GET.get('type', 'all')
 
-    public_books = PublicBook.objects.annotate(
-        reader_count=Count('books'),                 #  relation vers Book
-        avg_rating=Round(Avg('books__global_rate', output_field=FloatField()), 3)         #  note moyenne via books
+    # Livres
+    books = PublicBook.objects.annotate(
+        reader_count=Count('books'),
+        avg_rating=Coalesce(Round(Avg('books__global_rate'), 3), Value(0.0)),
+        content_type=Value('book', output_field=CharField())
     )
 
+    mangas = PublicManga.objects.annotate(
+        reader_count=Count('mangas'),
+        avg_rating=Coalesce(Round(Avg('mangas__global_rate'), 3), Value(0.0)),
+        content_type=Value('manga', output_field=CharField())
+    )
+
+    # Combinaison
+    items = []
+    for item in books:
+        items.append({
+            'id': item.id,
+            'title': item.title,
+            'image': item.image,
+            'reader_count': item.reader_count,
+            'avg_rating': item.avg_rating,
+            'content_type': item.content_type
+        })
+    
+    for item in mangas:
+        items.append({
+            'id': item.id,
+            'title': item.title,
+            'image': item.image,
+            'reader_count': item.reader_count,
+            'avg_rating': item.avg_rating,
+            'content_type': item.content_type
+        })
+
+    # Filtrage
+    if content_type != 'all':
+        items = [item for item in items if item['content_type'] == content_type]
+
+    # Tri
     if sort_by == 'rating':
-        public_books = public_books.order_by('-avg_rating')
+        items.sort(key=lambda x: x['avg_rating'], reverse=True)
     else:
-        public_books = public_books.order_by('-reader_count')
+        items.sort(key=lambda x: x['reader_count'], reverse=True)
 
-    context = {
-        'public_books': public_books,
-        'sort_by': sort_by
+    return render(request, 'media/public_dynamic_page.html', {
+        'items': items,
+        'sort_by': sort_by,
+        'content_type': content_type
+    })
+    
+def public_content_info(request, content_type, content_id):
+    if content_type == 'book':
+        model_class = PublicBook
+        relation_name = 'books'
+        content_template = 'media/public_content_info.html'
+    else:
+        model_class = PublicManga
+        relation_name = 'mangas'
+        content_template = 'media/public_content_info.html'
+
+    content = get_object_or_404(model_class, id=content_id)
+    user_items = getattr(content, relation_name).all()
+
+    # Statistiques
+    stats = {
+        'reader_count': user_items.count(),
+        'avg_rating': user_items.aggregate(avg=Round(Avg('global_rate'), 3))['avg'],
     }
-    return render(request, 'media/public_dynamic_page.html', context)
 
-def public_book_info(request, book_id):
-    public_book = get_object_or_404(PublicBook, id=book_id)
+    # Genres associés (robuste)
+    genre_field = user_items.model._meta.get_field('genres')
+    through_model = genre_field.remote_field.through
 
-    # Tous les UserBooks associés
-    userbooks = Book.objects.filter(public_book=public_book)
+    genre_ids = through_model.objects.filter(**{
+        f'{relation_name[:-1]}_id__in': user_items.values_list('id', flat=True)
+    }).values_list('genre_id', flat=True)
 
-    reader_count = userbooks.count()
-    avg_rating = userbooks.aggregate(avg=Avg('global_rate'))['avg']
+    genre_counts = Genre.objects.filter(id__in=genre_ids) \
+        .values('name') \
+        .annotate(total=Count('name')) \
+        .order_by('-total')
 
-    # Correction ici : on passe par Book pour récupérer les genres
-    genre_counts = Genre.objects.filter(book__in=userbooks) \
-                                .values('name') \
-                                .annotate(total=Count('name')) \
-                                .order_by('-total')
-
-    # Champs dynamiques non nuls
+    # Champs dynamiques
     dynamic_fields = []
-    for field in PublicBook._meta.fields:
+    for field in model_class._meta.fields:
         if field.name in ['id', 'title', 'image']:
             continue
-        value = getattr(public_book, field.name)
+        value = getattr(content, field.name)
         if value not in [None, '', []]:
             dynamic_fields.append({
                 'label': field.verbose_name.capitalize(),
@@ -719,15 +775,15 @@ def public_book_info(request, book_id):
             })
 
     context = {
-        'book': public_book,
-        'reader_count': reader_count,
-        'avg_rating': avg_rating,
+        'content': content,
+        'content_type': content_type,
+        'user_items': user_items,
         'genre_counts': genre_counts,
-        'userbooks': userbooks,
-        'dynamic_fields': dynamic_fields,
+        **stats,
+        'dynamic_fields': dynamic_fields
     }
 
-    return render(request, 'media/public_book_info.html', context)
+    return render(request, content_template, context)
 
 ################ Informations par compte #############
 

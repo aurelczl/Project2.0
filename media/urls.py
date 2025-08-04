@@ -11,8 +11,8 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     
     # Pages Publiques
-    path('public_dynamic_page/', views.public_dynamic_page, name='public_dynamic_page'),
-    path('public_book_info/<int:book_id>/', views.public_book_info, name='public_book_info'),
+    path('public_dynamic_page/', views.public_dynamic_page, name='public_content'),
+    path('content/<str:content_type>/<int:content_id>/', views.public_content_info, name='public_content_info'),
 
     # Détails de chaque élément
     #path('book/<int:book_id>/', views.book_detail, name='book_detail'),

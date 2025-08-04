@@ -1,14 +1,17 @@
 {% extends "base.html" %}
-{% load custom_tags %} 
+{% load custom_tags %}
 {% block content %}
 
 <div class="vintage-container">
-  <h1 class="vintage-title"><i class="fas fa-book"></i> {{ book.title }}</h1>
+  <h1 class="vintage-title">
+    <i class="fas fa-{% if content_type == 'book' %}book{% else %}book-open{% endif %}"></i> 
+    {{ content.title }}
+  </h1>
 
   <div class="vintage-book-display">
     <!-- Image à gauche -->
     <div class="vintage-book-cover">
-      <img src="{{ book.image.url }}" alt="{{ book.title }}" class="vintage-img">
+      <img src="{{ content.image.url }}" alt="{{ content.title }}" class="vintage-img">
       <div class="vintage-ornament"></div>
     </div>
 
@@ -16,10 +19,22 @@
     <div class="vintage-details">
       {% for field in dynamic_fields %}
         <p class="vintage-detail-item">
-          <strong><i class="fas fa-check-square vintage-icon icon-sm"></i> {{ field.label }} :</strong>          <span class="vintage-detail-value">{{ field.value }}</span>
+          <strong><i class="fas fa-check-square vintage-icon icon-sm"></i> {{ field.label }} :</strong>
+          <span class="vintage-detail-value">{{ field.value }}</span>
         </p>
       {% endfor %}
       
+      {% if content_type == 'manga' %}
+        <p class="vintage-detail-item">
+          <strong><i class="fas fa-globe vintage-icon icon-sm"></i> Site de lecture :</strong>
+          <span class="vintage-detail-value">{{ content.reading_website|default:"-" }}</span>
+        </p>
+        <p class="vintage-detail-item">
+          <strong><i class="fas fa-search vintage-icon icon-sm"></i> Scan :</strong>
+          <span class="vintage-detail-value">{{ content.scan|default:"-" }}</span>
+        </p>
+      {% endif %}
+
       <p class="vintage-stat">
         <i class="fas fa-users vintage-icon"></i> Nombre de lecteurs : 
         <span class="vintage-highlight">{{ reader_count }}</span>
