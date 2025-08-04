@@ -9,7 +9,10 @@ urlpatterns = [
     path('add/manga/', views.add_manga, name='add_manga'),
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
-
+    
+    # Pages Publiques
+    path('public_dynamic_page/', views.public_dynamic_page, name='public_dynamic_page'),
+    path('public_book_info/<int:book_id>/', views.public_book_info, name='public_book_info'),
 
     # Détails de chaque élément
     #path('book/<int:book_id>/', views.book_detail, name='book_detail'),

@@ -32,9 +32,10 @@
         <div class="header-band"></div>
 
         <nav>
-            <a href="/"><i class="fas fa-home"></i> Accueil</a>
+            <a href="/public_dynamic_page/"><i class="fas fa-home"></i> Accueil</a>
             
             {% if user.is_authenticated %}
+                <a href="/"><i class="fas fa-comments"></i> Mes notes</a>
                 <a href="/profile/"><i class="fas fa-user"></i> Mon profil</a>
                 <form action="{% url 'logout' %}" method="post" class="logout-form">
                    {% csrf_token %}

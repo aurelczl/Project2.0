@@ -4,6 +4,7 @@ from .models import Book, PublicBook, Series, Movie, Manga, Genre
 from .forms import BookForm, SeriesForm, MovieForm, MangaForm
 from django.http import Http404, JsonResponse, HttpResponse
 import requests
+from django.db.models import Count, Avg
 from django.views.decorators.http import require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
@@ -127,7 +128,7 @@ def import_selected_items(request):
         print("Erreur pendant l'import:", traceback.format_exc())
         return JsonResponse({'message': str(e)}, status=400)
 
-"""
+""" SI ON REVIENS A UN ENREGISTREMENT BACKUP AVEC LES TITRES
 @csrf_exempt
 @login_required
 def import_selected_items(request):
@@ -518,9 +519,73 @@ def fetch_booknode_suggestions(query):
         return []
         
 ################# BASE ##################################
+#########################################################
 
 def home(request):
     return render(request, 'media/home.html')
+
+########### Informations publics ########################
+from django.db.models.functions import Round
+from django.db.models import Avg, Count, FloatField
+
+def public_dynamic_page(request):
+    sort_by = request.GET.get('sort', 'popularity')  # 'popularity' ou 'rating'
+
+    public_books = PublicBook.objects.annotate(
+        reader_count=Count('books'),                 #  relation vers Book
+        avg_rating=Round(Avg('books__global_rate', output_field=FloatField()), 3)         #  note moyenne via books
+    )
+
+    if sort_by == 'rating':
+        public_books = public_books.order_by('-avg_rating')
+    else:
+        public_books = public_books.order_by('-reader_count')
+
+    context = {
+        'public_books': public_books,
+        'sort_by': sort_by
+    }
+    return render(request, 'media/public_dynamic_page.html', context)
+
+def public_book_info(request, book_id):
+    public_book = get_object_or_404(PublicBook, id=book_id)
+
+    # Tous les UserBooks associés
+    userbooks = Book.objects.filter(public_book=public_book)
+
+    reader_count = userbooks.count()
+    avg_rating = userbooks.aggregate(avg=Avg('global_rate'))['avg']
+
+    # Correction ici : on passe par Book pour récupérer les genres
+    genre_counts = Genre.objects.filter(book__in=userbooks) \
+                                .values('name') \
+                                .annotate(total=Count('name')) \
+                                .order_by('-total')
+
+    # Champs dynamiques non nuls
+    dynamic_fields = []
+    for field in PublicBook._meta.fields:
+        if field.name in ['id', 'title', 'image']:
+            continue
+        value = getattr(public_book, field.name)
+        if value not in [None, '', []]:
+            dynamic_fields.append({
+                'label': field.verbose_name.capitalize(),
+                'value': value
+            })
+
+    context = {
+        'book': public_book,
+        'reader_count': reader_count,
+        'avg_rating': avg_rating,
+        'genre_counts': genre_counts,
+        'userbooks': userbooks,
+        'dynamic_fields': dynamic_fields,
+    }
+
+    return render(request, 'media/public_book_info.html', context)
+
+################ Informations par compte #############
 
 def register(request):
     if request.method == 'POST':

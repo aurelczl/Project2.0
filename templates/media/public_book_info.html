@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load custom_tags %} 
+{% block content %}
+
+<div class="vintage-container">
+  <h1 class="vintage-title"><i class="fas fa-book"></i> {{ book.title }}</h1>
+
+  <div class="vintage-book-display">
+    <!-- Image à gauche -->
+    <div class="vintage-book-cover">
+      <img src="{{ book.image.url }}" alt="{{ book.title }}" class="vintage-img">
+      <div class="vintage-ornament"></div>
+    </div>
+
+    <!-- Champs dynamiques à droite -->
+    <div class="vintage-details">
+      {% for field in dynamic_fields %}
+        <p class="vintage-detail-item">
+          <strong><i class="fas fa-check-square vintage-icon icon-sm"></i> {{ field.label }} :</strong>          <span class="vintage-detail-value">{{ field.value }}</span>
+        </p>
+      {% endfor %}
+      
+      <p class="vintage-stat">
+        <i class="fas fa-users vintage-icon"></i> Nombre de lecteurs : 
+        <span class="vintage-highlight">{{ reader_count }}</span>
+      </p>
+      <p class="vintage-stat">
+        <i class="fas fa-star vintage-icon"></i> Note moyenne : 
+        <span class="vintage-highlight">{{ avg_rating|floatformat:1|default:"-" }}</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="vintage-genres">
+    <h3><i class="fas fa-tags"></i> Genres :</h3>
+    <ul class="vintage-tag-list">
+      {% for genre in genre_counts %}
+        <li class="vintage-tag">
+          <i class="fas fa-tag"></i> {{ genre.name }} 
+          <span class="vintage-tag-count">({{ genre.total }})</span>
+        </li>
+      {% empty %}
+        <li class="vintage-tag">Aucun genre renseigné.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* Style Vintage */
+  .vintage-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f0e5;
+    border: 1px solid #d4c9a8;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Times New Roman', serif;
+    color: #3a3226;
+    position: relative;
+  }
+
+  .vintage-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(90deg, 
+      #8b5a2b 0%, 
+      #a67c52 20%, 
+      #c19a6b 40%, 
+      #d4b483 60%, 
+      #c19a6b 80%, 
+      #8b5a2b 100%);
+  }
+
+  .vintage-title {
+    color: #5c4d3c;
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #8b5a2b;
+  }
+
+  .vintage-book-display {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f9f7f0;
+    border: 1px solid #d4c9a8;
+  }
+
+  .vintage-book-cover {
+    position: relative;
+    padding: 10px;
+    background: white;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.2);
+  }
+
+  .vintage-img {
+    width: 200px;
+    border: 1px solid #d4c9a8;
+  }
+
+  .vintage-ornament {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      #8b5a2b 20%, 
+      transparent 80%, 
+      #8b5a2b 100%);
+  }
+
+  .vintage-details {
+    flex: 1;
+  }
+
+  .vintage-detail-item {
+    margin-bottom: 12px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #d4c9a8;
+  }
+
+  .vintage-detail-value {
+    color: #5c4d3c;
+    font-style: italic;
+  }
+
+  .vintage-stat {
+    margin-top: 15px;
+    font-size: 1.1rem;
+  }
+
+  .vintage-highlight {
+    color: #8b5a2b;
+    font-weight: bold;
+  }
+
+  .vintage-genres {
+    padding: 15px;
+    background-color: #f9f7f0;
+    border: 1px solid #d4c9a8;
+  }
+
+  .vintage-genres h3 {
+    margin-top: 0;
+    color: #5c4d3c;
+    border-bottom: 1px solid #d4c9a8;
+    padding-bottom: 5px;
+  }
+
+  .vintage-tag-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .vintage-tag {
+    background-color: #e6d9c5;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    border: 1px solid #d4c9a8;
+  }
+
+  .vintage-tag-count {
+    color: #8b5a2b;
+    font-weight: bold;
+  }
+
+  .vintage-icon {
+    color: #8b5a2b;
+    margin-right: 8px;
+  }
+
+  .icon-sm {
+    font-size: 0.7em;
+    vertical-align: middle;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="vintage-library">
+  <h1 class="vintage-header"><i class="fas fa-book-open"></i> Livres publics</h1>
+
+  <form method="get" class="vintage-form">
+    <label for="sort"><i class="fas fa-sort"></i> Trier par :</label>
+    <select name="sort" id="sort" onchange="this.form.submit()" class="vintage-select">
+      <option value="popularity" {% if sort_by == "popularity" %}selected{% endif %}>Popularité (nombre de lecteurs)</option>
+      <option value="rating" {% if sort_by == "rating" %}selected{% endif %}>Note moyenne</option>
+    </select>
+  </form>
+
+  <div class="vintage-book-list">
+    {% for book in public_books %}
+      <div class="vintage-book-card">
+        <a href="{% url 'public_book_info' book.id %}" class="vintage-book-link">
+          <div class="vintage-book-cover">
+            <img src="{{ book.image.url }}" alt="{{ book.title }}" class="vintage-book-img">
+            <div class="vintage-book-ornament"></div>
+          </div>
+          <h3 class="vintage-book-title">{{ book.title }}</h3>
+        </a>
+        <p class="vintage-book-stat"><i class="fas fa-users vintage-icon"></i> {{ book.reader_count }} lecteurs</p>
+        <p class="vintage-book-stat"><i class="fas fa-star vintage-icon"></i> Moyenne : {{ book.avg_rating|default:"-" }}</p>
+      </div>
+    {% empty %}
+      <p class="vintage-empty"><i class="fas fa-book-dead"></i> Aucun livre trouvé.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  /* Style général vintage */
+  .vintage-library {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f0e5;
+    font-family: 'Times New Roman', serif;
+    color: #3a3226;
+    border: 1px solid #d4c9a8;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .vintage-header {
+    color: #5c4d3c;
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #8b5a2b;
+  }
+
+  /* Formulaire de tri */
+  .vintage-form {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #f9f7f0;
+    border: 1px solid #d4c9a8;
+    border-radius: 5px;
+  }
+
+  .vintage-select {
+    background-color: #f9f7f0;
+    border: 1px solid #8b5a2b;
+    padding: 5px 10px;
+    font-family: 'Times New Roman', serif;
+    color: #3a3226;
+    margin-left: 10px;
+  }
+
+  /* Liste de livres */
+  .vintage-book-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+  }
+
+  /* Carte de livre */
+  .vintage-book-card {
+    width: 220px;
+    padding: 15px;
+    background: #f9f7f0;
+    border: 1px solid #d4c9a8;
+    border-radius: 5px;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .vintage-book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .vintage-book-link {
+    text-decoration: none;
+    color: #3a3226;
+  }
+
+  /* Couverture de livre */
+  .vintage-book-cover {
+    position: relative;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: white;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
+  }
+
+  .vintage-book-img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #d4c9a8;
+    display: block;
+  }
+
+  .vintage-book-ornament {
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      #8b5a2b 20%, 
+      transparent 80%, 
+      #8b5a2b 100%);
+  }
+
+  /* Texte */
+  .vintage-book-title {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    color: #5c4d3c;
+    text-align: center;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vintage-book-stat {
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: #5c4d3c;
+    border-bottom: 1px dotted #d4c9a8;
+    padding-bottom: 5px;
+  }
+
+  .vintage-icon {
+    color: #8b5a2b;
+    margin-right: 8px;
+    font-size: 0.9em;
+  }
+
+  /* Message vide */
+  .vintage-empty {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #8b5a2b;
+    width: 100%;
+    padding: 30px;
+  }
+</style>
+
+{% endblock %}
