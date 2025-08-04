@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Book, PublicBook, Series, Movie, Manga, Genre
+from .models import Book, PublicBook, Series, Movie, Manga, PublicManga, Genre
 from .forms import BookForm, SeriesForm, MovieForm, MangaForm
 from django.http import Http404, JsonResponse, HttpResponse
 import requests
@@ -249,7 +249,7 @@ def import_selected_items(request):
         import traceback
         print("Erreur pendant l'import:", traceback.format_exc())
         return JsonResponse({'message': str(e)}, status=400)
-        
+
 """ SI ON REVIENS A UN ENREGISTREMENT BACKUP AVEC LES TITRES
 @csrf_exempt
 @login_required
@@ -413,7 +413,7 @@ def search_mangas(request):
     if len(query) < 3:
         return JsonResponse([], safe=False)
 
-    books = PublicManga.objects.filter(title__icontains=query)[:5]
+    mangas = PublicManga.objects.filter(title__icontains=query)[:5]
     
     results = []
     for manga in mangas:

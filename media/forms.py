@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
-from .models import Book, PublicBook, Series, Movie, Manga, Genre
+from .models import Book, PublicBook, Series, Movie, Manga, PublicManga, Genre
 import datetime
 
 """ VERSION 1.0
@@ -153,7 +153,7 @@ class MangaForm(forms.ModelForm):
             manga.genres.set(genres)
         
         return manga
-        
+
 """ 
 Création form book pour la version 2.0 
 composé de public et user book : Version 1.0 à commenter
