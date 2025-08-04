@@ -75,14 +75,14 @@
   .vintage-book-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 25px;
-    justify-content: center;
+    gap: 18px;
+    
   }
 
   /* Carte de livre */
   .vintage-book-card {
-    width: 220px;
-    padding: 15px;
+    width: 150px;
+    padding: 7px;
     background: #f9f7f0;
     border: 1px solid #d4c9a8;
     border-radius: 5px;
@@ -104,13 +104,15 @@
   .vintage-book-cover {
     position: relative;
     margin-bottom: 15px;
-    padding: 10px;
+    padding: 8px;
     background: white;
     box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
   }
 
   .vintage-book-img {
     width: 100%;
+    max-height: 170px;
+    object-fit: contain;
     height: auto;
     border: 1px solid #d4c9a8;
     display: block;
@@ -131,19 +133,19 @@
 
   /* Texte */
   .vintage-book-title {
-    font-size: 1.2rem;
-    margin: 10px 0;
+    font-size: 0.9rem;
+    margin: 8px 0;
     color: #5c4d3c;
     text-align: center;
-    min-height: 60px;
+    min-height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .vintage-book-stat {
-    margin: 8px 0;
-    font-size: 0.9rem;
+    margin: 6px 0;
+    font-size: 0.8rem;
     color: #5c4d3c;
     border-bottom: 1px dotted #d4c9a8;
     padding-bottom: 5px;
