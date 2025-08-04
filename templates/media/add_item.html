@@ -17,6 +17,16 @@
   </div>
   {% endif %}
 
+  {% if item == 'manga' %}
+  <div class="source-selector" style="margin-bottom: 20px;">
+    <small>Choisissez une source :</small><br>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-source active" data-source="mangalibrary">Ma Bibliothèque</button>
+      <button type="button" class="btn btn-source" data-source="openlibrary">Animlist ?</button>
+    </div>
+  </div>
+  {% endif %}
+
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 
@@ -38,6 +48,10 @@
     
     {% if item == 'book' %}
     <input type="hidden" name="public_book_id" id="public_book_id">
+    {% endif %}
+
+    {% if item == 'manga' %}
+    <input type="hidden" name="public_manga_id" id="public_manga_id">
     {% endif %}
 
     <div>
@@ -113,4 +127,12 @@
     document.addEventListener('DOMContentLoaded', initBookForm);
   </script>
   {% endif %}
+
+    {% if item == 'manga' %}
+  <script type="module">
+    import { initMangaForm } from "{% static 'js/add_manga.js' %}";
+    document.addEventListener('DOMContentLoaded', initMangaForm);
+  </script>
+  {% endif %}
+
 {% endblock %}

@@ -34,7 +34,9 @@ urlpatterns = [
     # Pour choix openlib/babelio/booknode :
     path('api/book-suggestions/', views.book_suggestions, name='book_suggestions'),
     path('api/fetch-book-info/', views.fetch_book_info, name='fetch_book_info'),
+    
     path('api/search-books/', views.search_books, name='search_books'),
+    path('api/search-mangas/', views.search_mangas, name='search_mangas'),
 
     path('backup/', views.backup_account, name='backup'),
     path('import-selected/', views.import_selected_items, name='import_selected_items'),

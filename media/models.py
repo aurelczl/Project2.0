@@ -31,6 +31,10 @@ class Genre(models.Model):
     def __str__(self):
         return self.name
 
+################### MANGA MODELS #######################################
+""" Création des models pour la version 2 séparation entre donnée publique et privée """
+
+""" VERSION 1.0
 class Manga(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
@@ -56,6 +60,58 @@ class Manga(models.Model):
     else:
         upload_path = 'manga_images/'
         image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+"""
+
+class PublicManga(models.Model):
+    """ Class regroupant l'ensemble des livres entré par au moins un user """
+
+    title = models.CharField(max_length=200, unique=True)
+    image = models.ImageField(upload_to='manga_images/')
+    
+    if RENDER:
+        image = CloudinaryField("image", blank=True, null=True)
+    else:
+        upload_path = 'manga_images/'
+        image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+class Manga(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    public_manga = models.ForeignKey(PublicManga, on_delete=models.CASCADE, related_name='mangas')
+    
+    STATUT_CHOICES = {
+        "Fini": "Fini",
+        "Arrêté": "Arrêté",
+        "En cours": "En cours",
+        "En attente": "En attente",
+    }
+    statut = models.CharField( max_length=10, choices=STATUT_CHOICES, blank=True, null=True)
+    genres = models.ManyToManyField(Genre, blank=True)
+    scan = models.CharField(max_length=2000, blank=True, null=True)
+    reading_website = models.URLField(blank=True, null=True)
+
+    finished_year = models.PositiveIntegerField(blank=True, null=True)
+    finished_month = models.PositiveIntegerField(blank=True, null=True)
+    finished_day = models.PositiveIntegerField(blank=True, null=True)
+    
+    global_rate = models.IntegerField(validators=[MinValueValidator(0),
+                                                  MaxValueValidator(100)],
+                                      null=True,blank=True,default=0,
+                                      help_text="Note entre 0 et 100")
+    
+    # Propriétés pour accès direct
+    @property
+    def title(self):
+        return self.public_manga.title
+
+    @property
+    def image(self):
+        return self.public_manga.image
 
     def __str__(self):
         return self.title

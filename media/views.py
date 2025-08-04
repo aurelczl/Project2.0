@@ -283,6 +283,28 @@ def search_books(request):
     
     return JsonResponse(results, safe=False)
 
+#### Recherche dans notre propre base de données : PublicManga 
+
+@require_GET
+def search_mangas(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 3:
+        return JsonResponse([], safe=False)
+
+    books = PublicManga.objects.filter(title__icontains=query)[:5]
+    
+    results = []
+    for manga in mangas:
+        results.append({
+            'id': manga.id,
+            'title': manga.title,
+            'image_url': manga.image.url if manga.image else '',
+            'source': 'mangalibrary',
+            'model': 'publicmanga'
+        })
+    
+    return JsonResponse(results, safe=False)
+
 ############################################################
 ### VUES API BOOKS : Openlibrary.org / babelio /booknode ###
 
@@ -782,23 +804,28 @@ def item_detail(request, model_name, item_id):
         'model_name': model_name,
     })
 
+#################### ADD_MANGA ###############
+# Version 2.0 
+
 @login_required
 def add_manga(request):
     if request.method == 'POST':
-        form = MangaForm(request.POST, request.FILES)
+        form = MangaForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
-            manga = form.save(user=request.user)
+            manga = form.save()
             return redirect('profile')
     else:
-        form = MangaForm()
+        form = MangaForm(user=request.user)
     
     # Envoie tous les genres pour peupler la liste Select2
+    item = 'manga'
     all_genres = Genre.objects.all()
 
     return render(request, 'media/add_item.html', {
         'form': form,
         'title': 'Ajouter un livre',
-        'all_genres': all_genres
+        'all_genres': all_genres,
+        'item': item,
     })
 
 #################### ADD_BOOK ##############

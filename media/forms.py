@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from .models import Book, PublicBook, Series, Movie, Manga, Genre
 import datetime
 
+""" VERSION 1.0
 class MangaForm(forms.ModelForm):
     raw_genres = forms.CharField(
         widget=forms.HiddenInput(),
@@ -64,7 +65,95 @@ class MangaForm(forms.ModelForm):
         genres = self.cleaned_data.get('raw_genres', [])
         manga.genres.set(genres)
         return manga
+"""
 
+class MangaForm(forms.ModelForm):
+    raw_genres = forms.CharField(widget=forms.HiddenInput(), required=False)
+    
+    # Déclarez explicitement les champs de PublicManga comme champs de formulaire
+    title = forms.CharField(max_length=200)
+    image = forms.ImageField(required=False)
+
+    class Meta:
+        model = Manga
+        fields = ['statut', 'scan', 'reading_website', 'finished_year', 
+                 'finished_month', 'finished_day', 'global_rate']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Pré-remplir les valeurs si instance existe
+        if self.instance.pk:
+            self.fields['title'].initial = self.instance.public_manga.title
+            self.fields['image'].initial = self.instance.public_manga.image
+
+    def clean(self):
+        cleaned_data = super().clean()
+        year = cleaned_data.get('finished_year')
+        month = cleaned_data.get('finished_month')
+        day = cleaned_data.get('finished_day')
+
+        if day and (not month or not year):
+            raise forms.ValidationError("Si vous indiquez un jour, le mois et l'année doivent aussi être renseignés.")
+        if month and not year:
+            raise forms.ValidationError("Si vous indiquez un mois, l'année doit être renseignée.")
+
+        # Vérifier que la date est valide
+        if year and month and day:
+            try:
+                datetime.date(year, month, day)
+            except ValueError:
+                raise forms.ValidationError("La date saisie n'est pas valide.")
+
+        return cleaned_data
+    
+    def clean_global_rate(self):
+        rate = self.cleaned_data.get('global_rate')
+        if rate is not None and (rate < 0 or rate > 100):
+            raise ValidationError("La note doit être comprise entre 0 et 100.")
+        return rate
+    
+    def clean_raw_genres(self):
+        raw = self.cleaned_data.get('raw_genres', '')
+        names = [name.strip() for name in raw.split(',') if name.strip()]
+        genres = []
+        for name in names:
+            genre, _ = Genre.objects.get_or_create(name=name)
+            genres.append(genre)
+        return genres
+
+    def save(self, commit=True):
+        # Créer/mettre à jour PublicManga d'abord
+        public_manga, created = PublicManga.objects.get_or_create(
+            title=self.cleaned_data['title'],
+            defaults={
+                'image': self.cleaned_data.get('image')
+            }
+        )
+        
+        if not created:
+            # Mettre à jour les champs si le manga existait déjà
+            if self.cleaned_data.get('image'):
+                public_manga.image = self.cleaned_data['image']
+                public_manga.save()
+
+        # Créer/mettre à jour Manga
+        manga = super().save(commit=False)
+        manga.user = self.user
+        manga.public_manga = public_manga
+        
+        if commit:
+            manga.save()
+            self.save_m2m()
+
+        # Gestion des genres
+        genres = self.cleaned_data.get('raw_genres', [])
+        if genres:
+            manga.genres.set(genres)
+        
+        return manga
+        
 """ 
 Création form book pour la version 2.0 
 composé de public et user book : Version 1.0 à commenter
