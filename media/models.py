@@ -82,7 +82,7 @@ class PublicManga(models.Model):
 
 class Manga(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    public_manga = models.ForeignKey(PublicManga, on_delete=models.CASCADE, related_name='mangas')
+    public_manga = models.ForeignKey(PublicManga, on_delete=models.CASCADE, related_name='mangas', null=True, blank=True)
     
     STATUT_CHOICES = {
         "Fini": "Fini",
@@ -98,7 +98,7 @@ class Manga(models.Model):
     finished_year = models.PositiveIntegerField(blank=True, null=True)
     finished_month = models.PositiveIntegerField(blank=True, null=True)
     finished_day = models.PositiveIntegerField(blank=True, null=True)
-    
+
     global_rate = models.IntegerField(validators=[MinValueValidator(0),
                                                   MaxValueValidator(100)],
                                       null=True,blank=True,default=0,
@@ -111,6 +111,8 @@ class Manga(models.Model):
 
     @property
     def image(self):
+        if not hasattr(self, 'public_manga') or self.public_manga is None:
+            return None  # Ou retournez une image par défaut
         return self.public_manga.image
 
     def __str__(self):
