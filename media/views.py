@@ -17,6 +17,8 @@ from .data_utils import export_user_data, import_user_data
 import os
 from django.conf import settings
 from django.core.files import File
+import traceback
+
 
 ###################################################################
 # Sauvegarde de données compte sur son appareil sous format json :
@@ -31,13 +33,12 @@ def backup_account(request):
     response['Content-Disposition'] = f'attachment; filename="{request.user.username}_backup.json"'
     return response
 
-"""
+
 @csrf_exempt
 @login_required
 def import_selected_items(request):
     if request.method != 'POST':
         return JsonResponse({'message': 'Méthode non autorisée'}, status=405)
-
     try:
         data = json.loads(request.body.decode('utf-8'))
         user = request.user
@@ -45,306 +46,126 @@ def import_selected_items(request):
         def get_or_create_genres(genre_list):
             return [Genre.objects.get_or_create(name=g)[0] for g in genre_list if g]
 
-        for category, items in data.items():
-            for item in items:
-                genres = get_or_create_genres(item.get('genres', []))
+        def handle_image_if_needed(obj, image_url):
+            if image_url and (not getattr(obj, 'image', None) or getattr(obj, 'created', False)):
+                handle_image_import(obj, image_url)
 
-                if category == 'book':
-                    public_book_id = item.get('public_book') or item.get('public_id')
+        def create_user_object(model, public_field_name, public_instance, user, item, genres, extra_fields=None):
+            fields = {
+                'user': user,
+                'statut': item.get('statut'),
+                'finished_year': item.get('finished_year'),
+                'finished_month': item.get('finished_month'),
+                'finished_day': item.get('finished_day'),
+                'global_rate': item.get('global_rate', 0),
+                public_field_name: public_instance
+            }
+            if extra_fields:
+                fields.update(extra_fields)
 
-                    # 💥 Si pas d'ID → erreur volontaire (export mal formé)
-                    if not public_book_id:
-                        return JsonResponse({
-                            'message': 'ID public_book manquant pour un livre. Vérifiez l\'export.'
-                        }, status=400)
+            obj = model.objects.create(**fields)
+            obj.genres.set(genres)
+            return obj
 
-                    # 🔍 On récupère le PublicBook
-                    public_book = PublicBook.objects.filter(id=public_book_id).first()
-                    if not public_book:
-                        return JsonResponse({
-                            'message': f'PublicBook avec ID={public_book_id} introuvable.'
-                        }, status=404)
+        def handle_book_or_manga(category, item, genres):
+            public_id_key = 'public_book' if category == 'book' else 'public_manga'
+            public_model = PublicBook if category == 'book' else PublicManga
+            user_model = Book if category == 'book' else Manga
+            public_field_name = 'public_book' if category == 'book' else 'public_manga'
 
-                    # ✅ Création du UserBook lié
-                    book = Book.objects.create(
-                        user=user,
-                        public_book=public_book,
-                        statut=item.get('statut'),
-                        global_rate=item.get('global_rate', 0),
-                        finished_year=item.get('finished_year'),
-                        finished_month=item.get('finished_month'),
-                        finished_day=item.get('finished_day'),
-                    )
-                    book.genres.set(genres)
+            public_id = item.get(public_id_key) or item.get('public_id')
+            title = item.get('title')
 
-                    if item.get('image'):
-                        handle_image_import(public_book, item['image'])
+            if not public_id and not title:
+                return JsonResponse({
+                    'message': f'ID ou titre manquant pour un {category}.'
+                }, status=400)
 
-                else:
-                    # 🔁 Pour les autres modèles
-                    model_map = {
-                        'manga': Manga,
-                        'series': Series,
-                        'movie': Movie
-                    }
-                    if category not in model_map:
-                        continue
-
-                    model = model_map[category]
-                    fields = {
-                        'user': user,
-                        'title': item.get('title'),
-                        'statut': item.get('statut'),
-                        'global_rate': item.get('global_rate', 0),
-                        'finished_year': item.get('finished_year'),
-                        'finished_month': item.get('finished_month'),
-                        'finished_day': item.get('finished_day'),
-                    }
-
-                    if category == 'manga':
-                        fields.update({
-                            'scan': item.get('scan'),
-                            'reading_website': item.get('reading_website')
-                        })
-                    elif category == 'series':
-                        fields.update({
-                            'seasons': item.get('seasons'),
-                            'episodes': item.get('episodes'),
-                            'saison': item.get('saison'),
-                            'episode': item.get('episode')
-                        })
-                    elif category == 'movie':
-                        fields['director'] = item.get('director')
-
-                    obj = model.objects.create(**fields)
-                    obj.genres.set(genres)
-
-                    if item.get('image'):
-                        handle_image_import(obj, item['image'])
-
-        return JsonResponse({'status': 'ok'})
-
-    except Exception as e:
-        import traceback
-        print("Erreur pendant l'import:", traceback.format_exc())
-        return JsonResponse({'message': str(e)}, status=400)
-"""
-@csrf_exempt
-@login_required
-def import_selected_items(request):
-    if request.method != 'POST':
-        return JsonResponse({'message': 'Méthode non autorisée'}, status=405)
-
-    try:
-        data = json.loads(request.body.decode('utf-8'))
-        user = request.user
-
-        def get_or_create_genres(genre_list):
-            return [Genre.objects.get_or_create(name=g)[0] for g in genre_list if g]
-
-        for category, items in data.items():
-            for item in items:
-                genres = get_or_create_genres(item.get('genres', []))
-
-                if category == 'book':
-                    # [Conserve exactement le même code existant pour les livres]
-                    public_book_id = item.get('public_book') or item.get('public_id')
-
-                    if not public_book_id:
-                        return JsonResponse({
-                            'message': 'ID public_book manquant pour un livre. Vérifiez l\'export.'
-                        }, status=400)
-
-                    public_book = PublicBook.objects.filter(id=public_book_id).first()
-                    if not public_book:
-                        return JsonResponse({
-                            'message': f'PublicBook avec ID={public_book_id} introuvable.'
-                        }, status=404)
-
-                    book = Book.objects.create(
-                        user=user,
-                        public_book=public_book,
-                        statut=item.get('statut'),
-                        global_rate=item.get('global_rate', 0),
-                        finished_year=item.get('finished_year'),
-                        finished_month=item.get('finished_month'),
-                        finished_day=item.get('finished_day'),
-                    )
-                    book.genres.set(genres)
-
-                    if item.get('image'):
-                        handle_image_import(public_book, item['image'])
-
-                elif category == 'manga':
-                    # Nouveau traitement spécifique pour les mangas
-                    title = item.get('title')
-                    if not title:
-                        return JsonResponse({
-                            'message': 'Titre manquant pour un manga.'
-                        }, status=400)
-
-                    # Création ou récupération du PublicManga
-                    public_manga, created = PublicManga.objects.get_or_create(
+            if public_id:
+                public_instance = public_model.objects.filter(id=public_id).first()
+                if not public_instance:
+                    return JsonResponse({
+                        'message': f'{public_model.__name__} avec ID={public_id} introuvable.'
+                    }, status=404)
+                created = False
+            else:
+                public_instance = public_model.objects.filter(title=title).first()
+                if not public_instance:
+                    public_instance, created = public_model.objects.get_or_create(
                         title=title,
-                        defaults={'image': item.get('image')}
+                        defaults={'image': item.get('image'),
+                                'author': item.get('author'),
+                                'edition': item.get('edition'),
+                                'pageCount': item.get('pageCount')} if category == 'book' else {}
                     )
-
-                    # Création du Manga lié à l'utilisateur
-                    manga = Manga.objects.create(
-                        user=user,
-                        public_manga=public_manga,
-                        statut=item.get('statut'),
-                        scan=item.get('scan'),
-                        reading_website=item.get('reading_website'),
-                        finished_year=item.get('finished_year'),
-                        finished_month=item.get('finished_month'),
-                        finished_day=item.get('finished_day'),
-                        global_rate=item.get('global_rate', 0),
-                    )
-                    manga.genres.set(genres)
-
-                    # Gestion de l'image si elle n'a pas été définie lors de la création
-                    if item.get('image') and (created or not public_manga.image):
-                        handle_image_import(public_manga, item['image'])
-
                 else:
-                    # [Conserve le code existant pour series et movie]
-                    model_map = {
-                        'series': Series,
-                        'movie': Movie
-                    }
-                    if category not in model_map:
-                        continue
+                    created = False
 
-                    model = model_map[category]
-                    fields = {
-                        'user': user,
-                        'title': item.get('title'),
-                        'statut': item.get('statut'),
-                        'global_rate': item.get('global_rate', 0),
-                        'finished_year': item.get('finished_year'),
-                        'finished_month': item.get('finished_month'),
-                        'finished_day': item.get('finished_day'),
-                    }
+            extra_fields = {}
+            if category == 'manga':
+                extra_fields = {
+                    'scan': item.get('scan'),
+                    'reading_website': item.get('reading_website')
+                }
 
-                    if category == 'series':
-                        fields.update({
-                            'seasons': item.get('seasons'),
-                            'episodes': item.get('episodes'),
-                            'saison': item.get('saison'),
-                            'episode': item.get('episode')
-                        })
-                    elif category == 'movie':
-                        fields['director'] = item.get('director')
+            user_object = create_user_object(
+                user_model, public_field_name, public_instance, user, item, genres, extra_fields
+            )
 
-                    obj = model.objects.create(**fields)
-                    obj.genres.set(genres)
+            if item.get('image') and (created or not public_instance.image):
+                handle_image_if_needed(public_instance, item.get('image'))
 
-                    if item.get('image'):
-                        handle_image_import(obj, item['image'])
+        def handle_series_or_movie(item, genres, category):
+            model_map = {
+                'series': Series,
+                'movie': Movie
+            }
+            model = model_map[category]
 
-        return JsonResponse({'status': 'ok'})
+            fields = {
+                'user': user,
+                'title': item.get('title'),
+                'statut': item.get('statut'),
+                'global_rate': item.get('global_rate', 0),
+                'finished_year': item.get('finished_year'),
+                'finished_month': item.get('finished_month'),
+                'finished_day': item.get('finished_day'),
+            }
 
-    except Exception as e:
-        import traceback
-        print("Erreur pendant l'import:", traceback.format_exc())
-        return JsonResponse({'message': str(e)}, status=400)
+            if category == 'series':
+                fields.update({
+                    'seasons': item.get('seasons'),
+                    'episodes': item.get('episodes'),
+                    'saison': item.get('saison'),
+                    'episode': item.get('episode'),
+                })
+            elif category == 'movie':
+                fields['director'] = item.get('director')
 
-""" SI ON REVIENS A UN ENREGISTREMENT BACKUP AVEC LES TITRES
-@csrf_exempt
-@login_required
-def import_selected_items(request):
-    if request.method != 'POST':
-        return JsonResponse({'message': 'Méthode non autorisée'}, status=405)
+            obj = model.objects.create(**fields)
+            obj.genres.set(genres)
+            handle_image_if_needed(obj, item.get('image'))
 
-    try:
-        data = json.loads(request.body.decode('utf-8'))
-        user = request.user
-
-        def get_or_create_genres(genre_list):
-            return [Genre.objects.get_or_create(name=g)[0] for g in genre_list if g]
-
+        # ----- Boucle principale -----
         for category, items in data.items():
             for item in items:
                 genres = get_or_create_genres(item.get('genres', []))
 
-                if category == 'book':
-                    # Gestion spécifique pour les livres
-                    public_book, _ = PublicBook.objects.get_or_create(
-                        title=item.get('title'),
-                        defaults={
-                            'author': item.get('author'),
-                            'edition': item.get('edition'),
-                            'pageCount': item.get('pageCount'),
-                        }
-                    )
-
-                    # Création du Book lié
-                    book = Book.objects.create(
-                        user=user,
-                        public_book=public_book,
-                        statut=item.get('statut'),
-                        global_rate=item.get('global_rate', 0),
-                        finished_year=item.get('finished_year'),
-                        finished_month=item.get('finished_month'),
-                        finished_day=item.get('finished_day'),
-                    )
-                    book.genres.set(genres)
-
-                    # Gestion de l'image
-                    if item.get('image'):
-                        handle_image_import(public_book, item['image'])
-
+                if category in ['book', 'manga']:
+                    response = handle_book_or_manga(category, item, genres)
+                elif category in ['series', 'movie']:
+                    response = handle_series_or_movie(item, genres, category)
                 else:
-                    # Gestion des autres modèles (manga, series, movie)
-                    model_map = {
-                        'manga': Manga,
-                        'series': Series,
-                        'movie': Movie
-                    }
-                    if category not in model_map:
-                        continue
+                    continue  # Catégorie non reconnue
 
-                    model = model_map[category]
-                    fields = {
-                        'user': user,
-                        'title': item.get('title'),
-                        'statut': item.get('statut'),
-                        'global_rate': item.get('global_rate', 0),
-                        'finished_year': item.get('finished_year'),
-                        'finished_month': item.get('finished_month'),
-                        'finished_day': item.get('finished_day'),
-                    }
-
-                    # Champs spécifiques
-                    if category == 'manga':
-                        fields.update({
-                            'scan': item.get('scan'),
-                            'reading_website': item.get('reading_website')
-                        })
-                    elif category == 'series':
-                        fields.update({
-                            'seasons': item.get('seasons'),
-                            'episodes': item.get('episodes'),
-                            'saison': item.get('saison'),
-                            'episode': item.get('episode')
-                        })
-                    elif category == 'movie':
-                        fields['director'] = item.get('director')
-
-                    obj = model.objects.create(**fields)
-                    obj.genres.set(genres)
-
-                    if item.get('image'):
-                        handle_image_import(obj, item['image'])
+                if isinstance(response, JsonResponse):  # Erreur dans un handler
+                    return response
 
         return JsonResponse({'status': 'ok'})
 
     except Exception as e:
-        import traceback
         print("Erreur pendant l'import:", traceback.format_exc())
         return JsonResponse({'message': str(e)}, status=400)
-"""
 
 def handle_image_import(obj, image_path):
     """Gère l'importation d'une image depuis le chemin sauvegardé"""
@@ -356,20 +177,6 @@ def handle_image_import(obj, image_path):
     else:
         print(f"⚠️ Image introuvable: {full_path}")
 
-
-#########################################################
-# Gestion des données local pour render : Ceci ne fonctionne pas
-""" OBSCOLETE ?
-@csrf_exempt
-def load_data(request):
-    if request.method == 'POST':
-        try:
-            from django.core.management import call_command
-            call_command('loaddata', 'data.json')
-            return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-""" 
 ###################### GESTION SUPER USER #################
 
 @staff_member_required
