@@ -34,36 +34,6 @@ class Genre(models.Model):
 ################### MANGA MODELS #######################################
 """ Création des models pour la version 2 séparation entre donnée publique et privée """
 
-""" VERSION 1.0
-class Manga(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=200)
-    genres = models.ManyToManyField(Genre, blank=True)
-    statuts = {
-        "Fini": "Fini",
-        "Arrêté": "Arrêté",
-        "En cours": "En cours",
-        "En attente": "En attente",
-    }
-    statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
-    scan = models.CharField(max_length=2000, blank=True, null=True)
-    reading_website = models.URLField(blank=True, null=True)
-    finished_year = models.PositiveIntegerField(blank=True, null=True)
-    finished_month = models.PositiveIntegerField(blank=True, null=True)
-    finished_day = models.PositiveIntegerField(blank=True, null=True)
-    global_rate = models.IntegerField(validators=[MinValueValidator(0),
-                                                  MaxValueValidator(100)],
-                                      null=True,blank=True,default=0,
-                                      help_text="Note entre 0 et 100")
-    if RENDER:
-        image = CloudinaryField("image", blank=True, null=True)
-    else:
-        upload_path = 'manga_images/'
-        image = models.ImageField(upload_to=upload_path, blank=True, null=True)
-
-    def __str__(self):
-        return self.title
-"""
 
 class PublicManga(models.Model):
     """ Class regroupant l'ensemble des livres entré par au moins un user """
@@ -89,6 +59,7 @@ class Manga(models.Model):
         "Arrêté": "Arrêté",
         "En cours": "En cours",
         "En attente": "En attente",
+        "My List": "My List",
     }
     statut = models.CharField( max_length=10, choices=STATUT_CHOICES, blank=True, null=True)
     genres = models.ManyToManyField(Genre, blank=True)
@@ -155,6 +126,7 @@ class Book(models.Model):
         "Arrêté": "Arrêté",
         "En cours": "En cours",
         "En attente": "En attente",
+        "My List": "My List",
     }
     statut = models.CharField( max_length=10, choices=STATUT_CHOICES, blank=True, null=True)
     genres = models.ManyToManyField(Genre, blank=True)
@@ -206,6 +178,7 @@ class Series(models.Model):
         "Arrêté": "Arrêté",
         "En cours": "En cours",
         "En attente": "En attente",
+        "My List": "My List",
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     saison = models.CharField(max_length=25, blank=True, null=True)
@@ -234,6 +207,7 @@ class Movie(models.Model):
         "Fini": "Fini",
         "Arrêté": "Arrêté",
         "En attente": "En attente",
+        "My List": "My List",
     }
     statut = models.CharField( max_length=10, choices=statuts, blank=True, null=True)
     finished_year = models.PositiveIntegerField(blank=True, null=True)
