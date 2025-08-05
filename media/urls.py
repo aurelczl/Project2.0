@@ -33,6 +33,5 @@ urlpatterns = [
     path('import-selected/', views.import_selected_items, name='import_selected_items'),
 
 
-
 ]
 
