@@ -24,7 +24,11 @@ import traceback
 # Sauvegarde de données compte sur son appareil sous format json :
 
 @login_required
-def backup_account(request):
+def backup_auto(request):
+    """ Sauvegarde des données comptes avec les public ID :
+    Permet de passer les données d'un compte à un autre, 
+    depuis un même server 
+    """
     json_io = export_user_data(request.user)
     response = HttpResponse(
         json_io.getvalue(),
@@ -33,6 +37,19 @@ def backup_account(request):
     response['Content-Disposition'] = f'attachment; filename="{request.user.username}_backup.json"'
     return response
 
+@login_required
+def backup_detail(request):
+    """ Sauvegarde des données comptes avec les détail :
+    Permet de passer les données d'un compte à un autre, 
+    depuis deux servers différents :: ECRIRE LA FONCTION
+    """
+    json_io = export_user_data(request.user)
+    response = HttpResponse(
+        json_io.getvalue(),
+        content_type='application/json'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{request.user.username}_backup.json"'
+    return response
 
 @csrf_exempt
 @login_required

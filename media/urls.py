@@ -29,7 +29,8 @@ urlpatterns = [
     path('api/search-books/', views.search_books, name='search_books'),
     path('api/search-mangas/', views.search_mangas, name='search_mangas'),
 
-    path('backup/', views.backup_account, name='backup'),
+    path('backup_auto/', views.backup_auto, name='backup_auto'),
+    path('backup_detail/', views.backup_detail, name='backup_detail'),
     path('import-selected/', views.import_selected_items, name='import_selected_items'),
 
 

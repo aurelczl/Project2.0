@@ -443,12 +443,18 @@ function getCSRFToken() {
 }
 </script>
 
-<button onclick="backup()">Télécharger la sauvegarde</button>
+<button onclick="backup_auto()">Télécharger la sauvegarde : Auto</button>
+<button onclick="backup_detail()">Télécharger la sauvegarde : détail</button>
 
 <script>
-// Sauvegarde
-async function backup() {
-    window.location.href = '/backup/';  // Déclenche le téléchargement
+// Sauvegarde auto
+async function backup_auto() {
+    window.location.href = '/backup_auto/';  // Déclenche le téléchargement
+}
+
+// Sauvegarde avec détail
+async function backup_detail() {
+    window.location.href = '/backup_detail/';  // Déclenche le téléchargement
 }
 
 // Import
