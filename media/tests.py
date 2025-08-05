@@ -1,15 +1,13 @@
 from django.test import TestCase
 
 # Create your tests here.
-
-######## IMPORT SELECTED ITEMS :: TESTS ######
-
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
 from .models import PublicBook, Book, PublicManga, Manga, Genre
 
 import json
+######## IMPORT SELECTED ITEMS :: TESTS ######
 
 class ImportSelectedItemsTest(TestCase):
     def setUp(self):
@@ -134,3 +132,60 @@ class ImportSelectedItemsTest(TestCase):
         self.assertEqual(manga.public_manga, public)
         self.assertEqual(manga.statut, "En cours")
         self.assertEqual(manga.genres.count(), 1)
+
+############# TESTS DES VIEWS #################
+
+from django.test import TestCase, Client
+from django.urls import reverse
+from django.contrib.auth.models import User
+from media.models import PublicBook, PublicManga, Book, Manga, Genre
+
+class ViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.genre = Genre.objects.create(name="Action")
+        
+        self.public_book = PublicBook.objects.create(title="Test Book", image="book.jpg")
+        self.public_manga = PublicManga.objects.create(title="Test Manga", image="manga.jpg")
+        
+        self.book = Book.objects.create(user=self.user, public_book=self.public_book, global_rate=75)
+        self.book.genres.add(self.genre)
+        
+        self.manga = Manga.objects.create(user=self.user, public_manga=self.public_manga, global_rate=85)
+        self.manga.genres.add(self.genre)
+
+    def test_home_view(self):
+        response = self.client.get(reverse("home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "media/home.html")
+
+    def test_public_dynamic_page_view(self):
+        response = self.client.get(reverse("public_dynamic_page"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "media/public_dynamic_page.html")
+        self.assertIn("items", response.context)
+
+    def test_public_content_info_view_manga(self):
+        url = reverse("public_content_info", args=["manga", self.public_manga.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("content", response.context)
+        self.assertTemplateUsed(response, "media/public_content_info.html")
+
+    def test_register_view(self):
+        response = self.client.get(reverse("register"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "registration/register.html")
+
+    def test_profile_view_logged_in(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(reverse("profile"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "media/profile.html")
+
+    def test_item_detail_view(self):
+        self.client.login(username="testuser", password="testpass")
+        response = self.client.get(reverse("item_detail", args=["book", self.book.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "media/detail_item.html")

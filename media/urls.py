@@ -11,7 +11,7 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     
     # Pages Publiques
-    path('public_dynamic_page/', views.public_dynamic_page, name='public_content'),
+    path('public_dynamic_page/', views.public_dynamic_page, name='public_dynamic_page'),
     path('content/<str:content_type>/<int:content_id>/', views.public_content_info, name='public_content_info'),
 
     path('<str:model_name>/<int:item_id>/edit/', views.edit_item, name='edit_item'),
