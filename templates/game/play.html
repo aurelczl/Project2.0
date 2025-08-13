@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Bienvenue {{ request.user.username }}</h1>
+
+{% if player %}
+    <p>Classe de personnage : {{ player.character_class.name }}</p>
+    <p><a href="{% url 'player_profile' %}" style="background:blue;color:white;padding:5px;">Voir mon profil</a></p>
+{% else %}
+    <p style="color:red;">⚠️ Vous n'avez pas encore de joueur.</p>
+    <a href="{% url 'create_player' %}" style="background:orange;color:white;padding:5px;">Créer un joueur</a>
+{% endif %}
+
+<hr>
+<h2>Lancer le jeu</h2>
+
+{% if player %}
+    <p>Token de connexion : <code id="token">{{ token }}</code></p>
+    <p>Ouvrez un terminal et exécutez la commande ci-dessous :</p>
+    <pre id="cmd"></pre>
+    <script>
+    const token = "{{ token }}";
+    document.getElementById("cmd").textContent =
+        `python pygame_client/main.py --token ${token}`;
+    </script>
+{% else %}
+    <p>⚠️ Vous devez créer un joueur avant de pouvoir lancer le jeu.</p>
+{% endif %}
+
+<hr>
+<h2>Vos scores</h2>
+<ul id="score-list"></ul>
+
+{% if player %}
+<script>
+fetch("/api/game/list/", {
+    headers: { "Authorization": "Token " + document.getElementById("token").textContent }
+})
+.then(response => response.json())
+.then(scores => {
+    const list = document.getElementById("score-list");
+    scores.forEach(score => {
+        const li = document.createElement("li");
+        li.textContent = `Score: ${score.value} - Date: ${score.created_at}`;
+        list.appendChild(li);
+    });
+});
+</script>
+{% else %}
+<p>⚠️ Aucune donnée à afficher — vous n'avez pas encore de joueur.</p>
+{% endif %}
+
+<script>
+async function launchGame() {
+    try {
+        const response = await fetch('/api/game/launch/', {
+            headers: {
+                'Authorization': 'Token {{ token }}'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'manual_launch_required') {
+            const launchArea = document.getElementById('launch-command');
+            launchArea.innerHTML = `
+                <h3>Commandes de lancement :</h3>
+                <textarea readonly class="command-box">${data.command}</textarea>
+                <p>${data.instructions}</p>
+            `;
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+    }
+}
+</script>
+
+<style>
+.command-box {
+    width: 100%;
+    padding: 10px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    font-family: monospace;
+}
+</style>
+
+<button onclick="launchGame()">Préparer le lancement</button>
+<div id="launch-command"></div>
+
+{% endblock %}

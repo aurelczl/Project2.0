@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Création de votre joueur</h1>
+
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <label for="character_class">Choisissez votre classe :</label>
+    <select name="character_class" id="character_class" required>
+        {% for c in classes %}
+            <option value="{{ c.id }}"
+                {% if c.default_image_male %}data-male-image="{{ c.default_image_male.url }}"{% else %}data-male-image=""{% endif %}
+                {% if c.default_image_female %}data-female-image="{{ c.default_image_female.url }}"{% else %}data-female-image=""{% endif %}
+            >
+                <h3>{{ c.name }}</h3>
+            </option>
+        {% endfor %}
+    </select>
+    <br><br>
+
+    <div id="class_info" style="margin-top: 20px;">
+        <h3 id="class_name"></h3>
+        <div id="class_attributes"></div>
+    </div>
+
+    <div id="default-image-selection" style="display:none;">
+        <p>Choisissez une image par défaut :</p>
+        <label>
+            <input type="radio" name="default_image_choice" value="M" checked>
+            <img id="male-image" src="" alt="Image Homme" style="width:150px; cursor:pointer; border: 2px solid transparent;">
+        </label>
+        <label>
+            <input type="radio" name="default_image_choice" value="F">
+            <img id="female-image" src="" alt="Image Femme" style="width:150px; cursor:pointer; border: 2px solid transparent;">
+        </label>
+    </div>
+    <br>
+
+    <label for="image">Image personnalisée (facultatif) :</label>
+    <input type="file" name="image" id="image" accept="image/*">
+    <br><br>
+
+    <button type="submit" style="background:green;color:white;padding:8px;">Créer mon joueur</button>
+</form>
+
+<script>
+
+const classesData = {{ classes_json|safe }};
+const classSelect = document.getElementById('character_class');
+const classNameEl = document.getElementById('class_name');
+const classAttributesEl = document.getElementById('class_attributes');
+
+function updateClassInfo() {
+    const classId = classSelect.value;
+    if (!classId || !classesData[classId]) {
+        classNameEl.textContent = "";
+        classAttributesEl.innerHTML = "";
+        return;
+    }
+
+    const c = classesData[classId];
+    classNameEl.textContent = c.name;
+
+    let html = "<ul>";
+    for (const [key, value] of Object.entries(c.attributes)) {
+        html += `<li><strong>${key.charAt(0).toUpperCase() + key.slice(1)}</strong>: ${value}</li>`;
+    }
+    html += "</ul>";
+    classAttributesEl.innerHTML = html;
+}
+
+classSelect.addEventListener("change", () => {
+    updateClassInfo();
+    updateImages(); // ta fonction existante
+});
+
+updateClassInfo();
+
+document.addEventListener('DOMContentLoaded', function() {
+    const classSelect = document.getElementById('character_class');
+    const maleImg = document.getElementById('male-image');
+    const femaleImg = document.getElementById('female-image');
+    const imageSelectionDiv = document.getElementById('default-image-selection');
+    const radios = document.getElementsByName('default_image_choice');
+
+    function updateImages() {
+        const selectedOption = classSelect.options[classSelect.selectedIndex];
+        const maleSrc = selectedOption.getAttribute('data-male-image');
+        const femaleSrc = selectedOption.getAttribute('data-female-image');
+
+        if (maleSrc || femaleSrc) {
+            imageSelectionDiv.style.display = 'block';
+            if (maleSrc) {
+                maleImg.src = maleSrc;
+                maleImg.style.display = 'inline';
+            } else {
+                maleImg.style.display = 'none';
+                radios[0].disabled = true;
+            }
+            if (femaleSrc) {
+                femaleImg.src = femaleSrc;
+                femaleImg.style.display = 'inline';
+            } else {
+                femaleImg.style.display = 'none';
+                radios[1].disabled = true;
+            }
+            // Par défaut, sélectionner la première image disponible
+            if (!radios[0].disabled) {
+                radios[0].checked = true;
+            } else if (!radios[1].disabled) {
+                radios[1].checked = true;
+            }
+        } else {
+            imageSelectionDiv.style.display = 'none';
+        }
+    }
+
+    // Met à jour les images au chargement et au changement de classe
+    updateImages();
+    classSelect.addEventListener('change', updateImages);
+
+    // Ajouter un effet visuel au clic sur les images (border)
+    [maleImg, femaleImg].forEach(img => {
+        img.addEventListener('click', () => {
+            if (img.style.display === 'none') return;
+            const value = img.id === 'male-image' ? 'M' : 'F';
+            radios.forEach(r => {
+                r.checked = (r.value === value);
+            });
+            updateBorders();
+        });
+    });
+
+    function updateBorders() {
+        radios.forEach(r => {
+            const img = r.value === 'M' ? maleImg : femaleImg;
+            if (r.checked) {
+                img.style.border = '4px solid green';
+            } else {
+                img.style.border = '2px solid transparent';
+            }
+        });
+    }
+
+    // Mise à jour initiale des bordures
+    updateBorders();
+
+    // Mise à jour des bordures lors du changement des radios (au clavier par ex)
+    radios.forEach(r => {
+        r.addEventListener('change', updateBorders);
+    });
+});
+</script>
+
+{% endblock %}

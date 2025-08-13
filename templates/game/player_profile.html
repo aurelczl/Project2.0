@@ -1,0 +1,46 @@
+<!-- templates/game/player_profile.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Profil de {{ player.user.username }}</h2>
+
+<div>
+    <img src="{{ player.displayed_image }}" alt="Image du personnage" width="150">
+
+</div>
+
+<h3>Classe : {{ player.character_class.name }}</h3>
+
+<ul>
+    {% for stat, value in player.performances.items %}
+    <li>{{ stat }} : {{ value }}</li>
+    {% endfor %}
+</ul>
+
+<!-- Bouton suppression -->
+<button id="deleteBtn" style="background:red;color:white;padding:10px;">
+    Supprimer le personnage
+</button>
+
+<!-- Modale de confirmation -->
+<div id="confirmModal" style="display:none;position:fixed;top:0;left:0;
+    width:100%;height:100%;background:rgba(0,0,0,0.5);">
+    <div style="background:white;padding:20px;margin:100px auto;width:300px;text-align:center;">
+        <p>⚠️ Attention, cette action va supprimer toutes vos données de personnage.<br>Êtes-vous sûr ?</p>
+        <form method="post" action="{% url 'delete_player' %}">
+            {% csrf_token %}
+            <button type="submit" style="background:red;color:white;">Oui, supprimer</button>
+            <button type="button" id="cancelBtn">Annuler</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById("deleteBtn").onclick = function(){
+    document.getElementById("confirmModal").style.display = "block";
+}
+document.getElementById("cancelBtn").onclick = function(){
+    document.getElementById("confirmModal").style.display = "none";
+}
+</script>
+
+{% endblock %}

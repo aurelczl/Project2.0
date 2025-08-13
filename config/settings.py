@@ -36,8 +36,8 @@ else:
     SECRET_KEY = 'django-insecure-6vh4^1ru^zqxf9(@&7t2^+3l54rd)%vx@t)h8-=($k+hkfy84s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not RENDER
-
+#DEBUG = not RENDER
+DEBUG = True
 # Configuration des hosts autorisés
 if RENDER:
     ALLOWED_HOSTS = [os.getenv('RENDER_EXTERNAL_HOSTNAME'), 'localhost', '127.0.0.1']
@@ -56,6 +56,9 @@ INSTALLED_APPS = [
     'media',
     'cloudinary_storage',
     'cloudinary',
+    'rest_framework',
+    'rest_framework.authtoken',  # Pour l'authentification par token
+    'game',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +93,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 LOGIN_REDIRECT_URL = '/profile/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
 
 
 # Database

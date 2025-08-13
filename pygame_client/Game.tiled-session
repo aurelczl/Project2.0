@@ -1,0 +1,47 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "PriseEnMain.tmx",
+    "expandedProjectPaths": [
+        "Jeuxdetuiles",
+        "Maps",
+        "."
+    ],
+    "fileStates": {
+        "PriseEnMain.tmx": {
+            "scale": 0.41562499999999997,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 401.80451127819555,
+                "y": 411.42857142857144
+            }
+        },
+        "dninjamonk_attack1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "tmw_desert_spacing.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Ninja_Monk",
+    "map.lastUsedFormat": "tmx",
+    "map.renderOrder": "2",
+    "openFiles": [
+        "PriseEnMain.tmx",
+        "tmw_desert_spacing.tsx",
+        "dninjamonk_attack1.tsx"
+    ],
+    "project": "Game.tiled-project",
+    "recentFiles": [
+        "dninjamonk_attack1.tsx",
+        "tmw_desert_spacing.tsx",
+        "PriseEnMain.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.margin": 0,
+    "tileset.spacing": 0
+}
