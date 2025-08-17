@@ -5,6 +5,8 @@ import random
 import argparse 
 from PIL import Image
 from io import BytesIO
+from maps import *
+from game import Game
 
 # --- Parsing des arguments (token reçu depuis la page web) ---
 parser = argparse.ArgumentParser()
@@ -16,6 +18,7 @@ API_URL = "http://127.0.0.1:8000/api/game/save/"
 API_URL_LIST = "http://127.0.0.1:8000/api/game/list/"  # adapte si ton site est en ligne
 PLAYER_INFO_URL = "http://127.0.0.1:8000/api/game/player/"
 HEADERS = {"Authorization": f"Token {TOKEN}"}
+
 
 def get_player_info():
     r = requests.get(PLAYER_INFO_URL, headers=HEADERS)
@@ -48,81 +51,65 @@ def send_score(score):
     except Exception as e:
         print("Impossible d'envoyer le score :", e)
 
-# === MINI JEU ===
-# --- Initialisation Pygame ---
+####################### Class Entity ####################
+class Entity(pygame.sprite.Sprite):
+    def __init__(self, keylistener: KeyListener):
+        super().__init__()
+        
+        self.keylistener = keylistener
+        self.spritesheet = pygame.image.load("../../assets/sprite/hero_01_red_m_walk.png")
+        self.image = Tool.split_image(self.spritesheet, 0, 0, 24, 32)
+        self.position = [0, 0]
+        self.rect: pygame.Rect = pygame.Rect(0, 0, 16, 32)
+        self.all_images = self.get_all_images()
+        self.index_image = 0
+
+    def update(self):
+        self.check_move()
+        self.rect.topleft = self.position
+
+    def check_move(self):
+        if self.keylistener.key_pressed(pygame.K_q):
+            self.move_left()
+        elif self.keylistener.key_pressed(pygame.K_d):
+            self.move_right()
+        elif self.keylistener.key_pressed(pygame.K_z):
+            self.move_up()
+        elif self.keylistener.key_pressed(pygame.K_s):
+            self.move_down()
+
+    def move_left(self):
+        self.position[0] -= 1
+        self.image = self.all_images["left"][self.index_image]
+
+    def move_right(self):
+        self.position[0] += 1
+        self.image = self.all_images["right"][self.index_image]
+
+    def move_up(self):
+        self.position[1] -= 1
+        self.image = self.all_images["up"][self.index_image]
+
+    def move_down(self):
+        self.position[1] += 1
+        self.image = self.all_images["down"][self.index_image]
+
+    def get_all_images(self):
+        all_images = {
+            "down": [],
+            "left": [],
+            "right": [],
+            "up": []
+        }
+        for i in range(4):
+            for j, key in enumerate(all_images.keys()):
+                all_images[key].append(Tool.split_image(self.spritesheet, i * 24, j*32, 24, 32))
+        return all_images
+
+####################################################
+
 pygame.init()
-pygame.font.init()
-font = pygame.font.SysFont(None, 36)
-screen = pygame.display.set_mode((800, 400))
-pygame.display.set_caption("Mini jeu 2D avec personnage")
-clock = pygame.time.Clock()
 
-# --- Chargement du player via API ---
-player_data = get_player_info()
-print("Nom :", player_data["username"])
-print("Classe :", player_data["class"])
-print("Stats :", player_data["stats"])
-
-# Charger l'image
-img_url = player_data["image_url"]
-if img_url:
-    img_data = requests.get(img_url).content
-    pil_image = Image.open(BytesIO(img_data)).convert("RGBA")
-    mode = pil_image.mode
-    size = pil_image.size
-    
-    original_width, original_height = pil_image.size
-    new_width = 120
-    new_height = int((new_width / original_width) * original_height)
-    
-    data = pil_image.tobytes()
-    player_img = pygame.image.fromstring(data, size, mode)
-    player_img = pygame.transform.scale(player_img, (new_width, new_height))
-else:
-    raise FileNotFoundError("Aucune image disponible pour ce joueur")
-
-# Position & vitesse du joueur
-player_x = 150
-player_y = 200
-player_vel_y = 0
-is_jumping = False
-
-# Sol
-ground_height = 50
-
-score = get_last_score()
-print(f"Score précédent chargé : {score}")
-
-# --- Boucle du jeu ---
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            send_score(score)
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and not is_jumping:
-                is_jumping = True
-                player_vel_y = -15  # saut vers le haut
-                score += random.randint(1, 5)  # incrément du score
-
-    # --- Logique du saut ---
-    if is_jumping:
-        player_y += player_vel_y
-        player_vel_y += 1  # gravité
-        if player_y >= 300:
-            player_y = 300
-            is_jumping = False
-
-    # --- Dessin ---
-    screen.fill((135, 206, 235))  # ciel bleu
-    pygame.draw.rect(screen, (34, 139, 34), (0, 350, 800, ground_height))  # sol
-    screen.blit(player_img, (player_x, player_y))
-    score_text = font.render(f"Score: {score}", True, (0, 0, 0))
-    screen.blit(score_text, (20, 20))
-
-    pygame.display.flip()
-    clock.tick(30)
-
-pygame.quit()
-sys.exit()
+if __name__ == "__main__":
+    game = Game()
+    game.run()
