@@ -3,27 +3,187 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "PriseEnMain.tmx",
+    "activeFile": "Map0.tmx",
     "expandedProjectPaths": [
         "Jeuxdetuiles",
-        "Maps",
-        "."
+        "Tiled/Tilemaps/Rules",
+        ".",
+        "Tiled/Tilemaps",
+        "Maps"
     ],
+    "file.lastUsedOpenFilter": "Tous les Fichiers (*)",
     "fileStates": {
+        ":/automap-tiles.tsx": {
+            "scaleInDock": 1
+        },
         "Attack_1.tsx": {
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        },
+        "Buildings.tsx": {
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilemaps/Beginning Fields.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 305.66666666666663,
+                "y": 427.66666666666663
+            }
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilemaps/Rules/RockSlopes_Rules.tmx": {
+            "scale": 0.5780120481927711,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 639.2600312662846,
+                "y": 596.0083376758729
+            }
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Animation_Campfire.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Animation_Flowers_Red.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Animation_Flowers_White.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Atlas_Buildings.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Atlas_Props.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Atlas_Rocks.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Atlas_Trees_Bushes.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Objects_Buildings.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Objects_Props.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Objects_Rocks.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Objects_Trees.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Tileset_Ground.tsx": {
+            "scaleInDock": 1.8
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Tileset_RockSlope.tsx": {
+            "scaleInDock": 1.8
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Tileset_RockSlope_Simple.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Tileset_Water.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilesets/Tilesets_Road.tsx": {
+            "scaleInDock": 1
+        },
+        "Map0.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 519.3333333333333,
+                "y": 420.66666666666674
+            }
+        },
+        "PriseEnMain.tmx": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 480.25,
+                "y": 319.75
+            }
+        },
+        "Props.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
-        "PriseEnMain.tmx": {
-            "scale": 1,
-            "selectedLayer": 1,
-            "viewCenter": {
-                "x": 499.5,
-                "y": 585
-            }
-        },
         "Slime1_Attack_body.tsx": {
             "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Tiled/Tilemaps/Beginning Fields.tmx": {
+            "scale": 0.9321875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 319.6781763325511,
+                "y": 320.2145491116326
+            }
+        },
+        "Tiled/Tilesets/Animation_Campfire.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Animation_Flowers_Red.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Animation_Flowers_White.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Atlas_Buildings.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Atlas_Props.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Atlas_Rocks.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Atlas_Trees_Bushes.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Objects_Buildings.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Objects_Props.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Objects_Rocks.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Objects_Trees.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Tileset_Ground.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Tileset_RockSlope.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Tileset_RockSlope_Simple.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Tileset_Water.tsx": {
+            "scaleInDock": 1
+        },
+        "Tiled/Tilesets/Tilesets_Road.tsx": {
+            "scaleInDock": 1
+        },
+        "Tileset_Ground.tsx": {
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        },
+        "Tileset_RockSlope.tsx": {
+            "scaleInDock": 1.25,
+            "scaleInEditor": 1
+        },
+        "Tileset_Water.tsx": {
+            "scaleInDock": 1.8,
+            "scaleInEditor": 1
+        },
+        "Well_Hay_1.tsx": {
+            "scaleInDock": 1.8,
             "scaleInEditor": 1
         },
         "dninjamonk_attack1.tsx": {
@@ -31,7 +191,7 @@
             "scaleInEditor": 1
         },
         "exterior.tsx": {
-            "scaleInDock": 1,
+            "scaleInDock": 1.8,
             "scaleInEditor": 1
         },
         "exterior2020.tsx": {
@@ -42,46 +202,63 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "idle.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
         "tilesetglobal.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
         "tmw_desert_spacing.tsx": {
-            "scaleInDock": 1,
+            "scaleInDock": 1.8,
             "scaleInEditor": 1
         },
         "walls_floor.tsx": {
-            "scaleInDock": 1
+            "scaleInDock": 1.8
         },
         "walls_floor_dongeon.tsx": {
-            "scaleInDock": 1
+            "scaleInDock": 1.8
         }
     },
     "frame.defaultDuration": 120,
-    "last.imagePath": "C:/Users/aurel/MyWeb_main/Projet2.0/pygame_client/Jeuxdetuiles",
+    "last.externalTilesetPath": "C:/Users/aurel/MyWeb_main/Projet2.0/pygame_client",
+    "last.imagePath": "C:/Users/aurel/MyWeb_main/Projet2.0/pygame_client/Jeuxdetuiles/Fantasy_tileset",
+    "map.height": 30,
     "map.lastUsedFormat": "tmx",
     "map.renderOrder": "2",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 40,
     "openFiles": [
-        "PriseEnMain.tmx"
+        "PriseEnMain.tmx",
+        "Map0.tmx",
+        "Buildings.tsx",
+        "Props.tsx"
     ],
     "project": "Game.tiled-project",
     "property.type": "string",
     "recentFiles": [
         "PriseEnMain.tmx",
-        "Attack_1.tsx",
-        "exterior.tsx",
-        "tmw_desert_spacing.tsx",
-        "exterior2020.tsx",
-        "exterior4040.tsx",
-        "tilesetglobal.tsx",
-        "dninjamonk_attack1.tsx",
-        "Slime1_Attack_body.tsx"
+        "Props.tsx",
+        "Buildings.tsx",
+        "Map0.tmx",
+        "idle.tsx",
+        "Well_Hay_1.tsx",
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilemaps/Beginning Fields.tmx",
+        "Tileset_Water.tsx",
+        "Tileset_RockSlope.tsx",
+        "Tileset_Ground.tsx",
+        "Tiled/Tilemaps/Beginning Fields.tmx",
+        "C:/Users/aurel/OneDrive - ensam.eu/Images/tileset/Fantasy_tileset/The Fan-tasy Tileset (Free)/Tiled/Tilemaps/Rules/RockSlopes_Rules.tmx"
     ],
+    "resizeMap.removeObjects": false,
+    "tileset.lastUsedFilter": "Fichiers de jeu de tuiles Tiled (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
     "tileset.margin": 0,
     "tileset.spacing": 0,
     "tileset.tileSize": {
-        "height": 20,
-        "width": 20
+        "height": 16,
+        "width": 16
     }
 }

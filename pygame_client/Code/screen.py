@@ -3,8 +3,8 @@ import pygame
 
 class Screen:
     def __init__(self):
-        self.display = pygame.display.set_mode((800, 400))
-        pygame.display.set_caption("Pokémon")
+        self.display = pygame.display.set_mode((800, 600))
+        pygame.display.set_caption("Mon Jeu")
         self.clock = pygame.time.Clock()
         self.framerate = 60
 
