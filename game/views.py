@@ -85,7 +85,7 @@ def create_player(request):
                 player.image = char_class.default_image_female
 
         player.save()
-        return redirect("game/play.html")
+        return redirect('play_view')
 
     return render(request, "game/create_player.html", {
         "classes": classes,
