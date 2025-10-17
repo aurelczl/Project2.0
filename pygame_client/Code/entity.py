@@ -100,6 +100,10 @@ class Entity(pygame.sprite.Sprite):
         elif self.keylistener.key_pressed(pygame.K_s):
             self.move_down()
             self.is_moving = True
+        elif self.keylistener.key_pressed(pygame.K_space):
+            self.jumping()
+            self.action = 'Jump'
+            self.is_moving = True
 
     def animate(self):
         now = pygame.time.get_ticks()
@@ -126,6 +130,11 @@ class Entity(pygame.sprite.Sprite):
 
     def move_down(self):
         self.position[1] += 2
+
+    def jumping(self):
+        # A changer 
+        self.position[1] = self.position[1] + 2
+        self.position[1] = self.position[1] -2
 
     def get_walk_frames(self):
         walk_frames = []
